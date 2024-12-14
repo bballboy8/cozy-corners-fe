@@ -66,11 +66,15 @@ table{
   border-radius: 20px;
   overflow: hidden;
 }
-.btnsubmit{
+.btnsubmit, .btn:first-child:active, .btn:hover{
   background-color: #0F123F;
   color: #f3f3f3;
   padding:5px 5px;
 }
 th, td{
   text-align: center;
+}
+.ctm-popup{
+  position: absolute;
+  top:35%;
 }

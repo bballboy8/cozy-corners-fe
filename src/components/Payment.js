@@ -26,20 +26,48 @@ const Payment = () => {
                errorMessages.nameOnCard = 'Name on card is required';
            }
    
-           if (!e.target.cardNumber.value) {
+           const cardNumber = e.target.cardNumber.value;
+           if (!cardNumber) {
                formIsValid = false;
                errorMessages.cardNumber = 'Credit card number is required';
-           }
-   
-           if (!e.target.expirationDate.value) {
+           } else if (cardNumber.length !== 12) {
                formIsValid = false;
-               errorMessages.expirationDate = 'Expiration date is required';
+               errorMessages.cardNumber = 'Card number must be 12 digits';
            }
+
    
-           if (!e.target.cvv.value) {
+           const expirationDate = e.target.expirationDate.value;
+           const expirationDateRegex = /^(0[1-9]|1[0-2])\/\d{4}$/;
+           if (!expirationDate) {
                formIsValid = false;
-               errorMessages.cvv = 'CVV is required';
+               errorMessages.expirationDate = 'date is required';
+           } else if (!expirationDateRegex.test(expirationDate)) {
+               formIsValid = false;
+               errorMessages.expirationDate = 'date must be in MM/YYYY';
+           } else {
+               // Extract month and year from the expiration date
+               const [month, year] = expirationDate.split('/');
+               const currentYear = new Date().getFullYear();
+               const currentMonth = new Date().getMonth() + 1; // Months are zero-indexed, so add 1
+   
+               // Validate the year is not in the past
+               if (parseInt(year) < currentYear) {
+                   formIsValid = false;
+                   errorMessages.expirationDate = 'your card is expired';
+               } else if (parseInt(year) === currentYear && parseInt(month) < currentMonth) {
+                   formIsValid = false;
+                   errorMessages.expirationDate = 'your card is expired';
+               }
            }
+
+        const cvv = e.target.cvv.value;
+        if (!cvv) {
+            formIsValid = false;
+            errorMessages.cvv = 'CVV is required';
+        } else if (cvv.length !== 3) {
+            formIsValid = false;
+            errorMessages.cvv = 'CVV must be 3 digits';
+        }
    
             if (!e.target.amount.value) {
                formIsValid = false;
@@ -82,10 +110,11 @@ const Payment = () => {
                                            <div className="col-md-12 mb-2">
                                                <label className="mb-2">Credit Card Number</label>
                                                <input
-                                                   type="text"
+                                                   type="number"
                                                    placeholder="Enter Credit card number"
                                                    className="form-control"
                                                    name="cardNumber"
+                                                   maxLength="12" 
                                                    required
                                                />
                                                {errors.cardNumber && (
@@ -100,6 +129,7 @@ const Payment = () => {
                                                    placeholder="MM/YYYY"
                                                    className="form-control"
                                                    name="expirationDate"
+                                                   maxLength="7" 
                                                    required
                                                />
                                                {errors.expirationDate && (
@@ -114,6 +144,7 @@ const Payment = () => {
                                                    placeholder="Enter CVV code"
                                                    className="form-control"
                                                    name="cvv"
+                                                   maxLength="3" 
                                                    required
                                                />
                                                {errors.cvv && (
@@ -123,7 +154,7 @@ const Payment = () => {
                                            <div className="col-md-12 mb-2">
                                                <label className="mb-2">Enter Amount</label>
                                                <input
-                                                   type="text"
+                                                   type="number"
                                                    placeholder="Enter Amount"
                                                    className="form-control"
                                                    name="amount"

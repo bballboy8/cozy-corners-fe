@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 
 const Register = () => {
+    const [showModal, setShowModal] = useState(false);
+
     // Define state for error messages
     const [errors, setErrors] = useState({
         firstName: '',
@@ -25,7 +27,6 @@ const Register = () => {
     // Handle form submission
     const handleSubmit = (e) => {
         e.preventDefault(); // Prevent default form submission
-
         // Validate all fields
         let formIsValid = true;
         let errorMessages = {};
@@ -49,20 +50,46 @@ const Register = () => {
             formIsValid = false;
             errorMessages.nameOnCard = 'Name on card is required';
         }
-
-        if (!e.target.cardNumber.value) {
+        const cardNumber = e.target.cardNumber.value;
+        if (!cardNumber) {
             formIsValid = false;
             errorMessages.cardNumber = 'Credit card number is required';
+        } else if (cardNumber.length !== 12) {
+            formIsValid = false;
+            errorMessages.cardNumber = 'Card number must be 12 digits';
         }
 
-        if (!e.target.expirationDate.value) {
+        const expirationDate = e.target.expirationDate.value;
+        const expirationDateRegex = /^(0[1-9]|1[0-2])\/\d{4}$/;
+        if (!expirationDate) {
             formIsValid = false;
             errorMessages.expirationDate = 'Expiration date is required';
+        } else if (!expirationDateRegex.test(expirationDate)) {
+            formIsValid = false;
+            errorMessages.expirationDate = 'Expiration date must be in MM/YYYY format';
+        } else {
+            // Extract month and year from the expiration date
+            const [month, year] = expirationDate.split('/');
+            const currentYear = new Date().getFullYear();
+            const currentMonth = new Date().getMonth() + 1; // Months are zero-indexed, so add 1
+
+            // Validate the year is not in the past
+            if (parseInt(year) < currentYear) {
+                formIsValid = false;
+                errorMessages.expirationDate = 'your card is expired';
+            } else if (parseInt(year) === currentYear && parseInt(month) < currentMonth) {
+                formIsValid = false;
+                errorMessages.expirationDate = 'your card is expired';
+            }
         }
 
-        if (!e.target.cvv.value) {
+        const cvv = e.target.cvv.value;
+        if (!cvv) {
             formIsValid = false;
             errorMessages.cvv = 'CVV is required';
+        } else if (cvv.length !== 3) {
+            formIsValid = false;
+            errorMessages.cvv = 'CVV must be 3 digits';
         }
 
         if (!e.target.isChecked.checked) {
@@ -75,8 +102,12 @@ const Register = () => {
         // If the form is valid, we can submit it
         if (formIsValid) {
             console.log('Form submitted');
+            setShowModal(true);
             // Submit form logic here, e.g., call an API
         }
+    };
+    const closeModal = () => {
+        setShowModal(false);
     };
 
     return (
@@ -156,10 +187,11 @@ const Register = () => {
                                         <div className="col-md-12 mb-2">
                                             <label className="mb-2">Credit Card Number</label>
                                             <input
-                                                type="text"
+                                                type="number"
                                                 placeholder="Enter Credit card number"
                                                 className="form-control"
                                                 name="cardNumber"
+                                                maxLength="12" 
                                                 required
                                             />
                                             {errors.cardNumber && (
@@ -184,10 +216,11 @@ const Register = () => {
                                         <div className="col-md-6 mb-2">
                                             <label className="mb-2">CVV</label>
                                             <input
-                                                type="text"
+                                                type="number"
                                                 placeholder="Enter CVV code"
                                                 className="form-control"
                                                 name="cvv"
+                                                maxLength="3" 
                                                 required
                                             />
                                             {errors.cvv && (
@@ -202,7 +235,7 @@ const Register = () => {
                                                 name="isChecked"
                                                 onChange={handleCheckboxChange}
                                             />
-                                            I certify that I am of the age of majority in my respective jurisdiction or have permission from a legal parent or guardian to use this site
+                                            I certify that I am of the age of majority in my respective jurisdiction or have permission from a legal parent or guardian to use this site. <br/>
                                             {errors.isChecked && (
                                                 <small className="text-danger">{errors.isChecked}</small>
                                             )}
@@ -220,6 +253,27 @@ const Register = () => {
                     </div>
                 </div>
             </div>
+
+            {showModal && (
+                <div class="modal ctm-popup" style={{ display:"block" }}>
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Cozy Corners</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"  onClick={closeModal}></button>
+                    </div>
+                    <div class="modal-body">
+                      <p>Thanks for your registeration</p>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onClick={closeModal}>Close</button>
+                      
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
         </>
     );
 };
