@@ -1,0 +1,76 @@
+/* Make sure the left side div (with the image) takes full height */
+.left-side {
+  height: 100vh;
+}
+
+.left-side img {
+  object-fit: cover;  /* Ensures the image covers the div */
+}
+
+/* Right side login form centered vertically and horizontally */
+.right-side {
+  height: 100vh;
+  background-color: #e2e3e333;
+}
+.login-form {
+  width: 100%;  /* Adjust form width */
+  max-width: 600px;
+  padding: 20px;
+  border:1px solid #a09c9c;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.login-form.dashboard{
+  max-width: 400px;
+  border:2px solid #a09c9c66;;
+  border-radius: 8px;
+  box-shadow:3px 8px 8px rgba(10, 10, 10, 0.2);
+}
+.login-form h2 {
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+.login-right-side {
+  background-image: url('/public/img/image6.png');  /* Referencing the image from the public folder */
+  background-size: cover;  /* Cover the whole container */
+  background-position: center;  /* Center the background */
+  height: 100vh;  /* Take up the entire height of the viewport */
+}
+.login-form-section{
+  background-color: #f3f3f3;
+  border-radius: 20px;
+  padding:20px 20px 30px 20px;
+}
+.fix-height{
+  height:50vh !important;
+}
+table{
+  width:100%;
+  border:1px solid #000;
+  border-radius: 20px;
+  padding:20px 20px 30px 20px;
+}
+.bg-head{
+  background-color: #585B88 !important;
+  color:#fff !important;
+  padding:10px !important;
+}
+.ctm-width{
+  width: 90%;
+  margin-top:90px;
+}
+.bdrRadius{
+  border-radius: 20px;
+  overflow: hidden;
+}
+.btnsubmit{
+  background-color: #0F123F;
+  color: #f3f3f3;
+  padding:5px 5px;
+}
+th, td{
+  text-align: center;
+}
