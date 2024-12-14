@@ -60,26 +60,28 @@ const Register = () => {
         }
 
         const expirationDate = e.target.expirationDate.value;
-        const expirationDateRegex = /^(0[1-9]|1[0-2])\/\d{4}$/;
+        const expirationDateRegex = /^(0[1-9]|1[0-2])\/\d{2}$/;
         if (!expirationDate) {
             formIsValid = false;
             errorMessages.expirationDate = 'Expiration date is required';
         } else if (!expirationDateRegex.test(expirationDate)) {
             formIsValid = false;
-            errorMessages.expirationDate = 'Expiration date must be in MM/YYYY format';
+            errorMessages.expirationDate = 'Expiration date must be in MM/YY format';
         } else {
-            // Extract month and year from the expiration date
             const [month, year] = expirationDate.split('/');
             const currentYear = new Date().getFullYear();
             const currentMonth = new Date().getMonth() + 1; // Months are zero-indexed, so add 1
-
+        
+            // Convert 2-digit year to 4-digit year (assuming 21st century)
+            const fullYear = 2000 + parseInt(year); 
+        
             // Validate the year is not in the past
-            if (parseInt(year) < currentYear) {
+            if (fullYear < currentYear) {
                 formIsValid = false;
-                errorMessages.expirationDate = 'your card is expired';
-            } else if (parseInt(year) === currentYear && parseInt(month) < currentMonth) {
+                errorMessages.expirationDate = 'Your card is expired';
+            } else if (fullYear === currentYear && parseInt(month) < currentMonth) {
                 formIsValid = false;
-                errorMessages.expirationDate = 'your card is expired';
+                errorMessages.expirationDate = 'Your card is expired';
             }
         }
 
@@ -203,9 +205,10 @@ const Register = () => {
                                             <label className="mb-2">Expiration Date</label>
                                             <input
                                                 type="text"
-                                                placeholder="MM/YYYY"
+                                                placeholder="MM/YY"
                                                 className="form-control"
                                                 name="expirationDate"
+                                                maxLength="5" 
                                                 required
                                             />
                                             {errors.expirationDate && (

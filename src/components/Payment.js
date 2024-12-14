@@ -37,7 +37,7 @@ const Payment = () => {
 
    
            const expirationDate = e.target.expirationDate.value;
-           const expirationDateRegex = /^(0[1-9]|1[0-2])\/\d{4}$/;
+           const expirationDateRegex = /^(0[1-9]|1[0-2])\/\d{3}$/;
            if (!expirationDate) {
                formIsValid = false;
                errorMessages.expirationDate = 'date is required';
@@ -45,19 +45,21 @@ const Payment = () => {
                formIsValid = false;
                errorMessages.expirationDate = 'date must be in MM/YYYY';
            } else {
-               // Extract month and year from the expiration date
-               const [month, year] = expirationDate.split('/');
-               const currentYear = new Date().getFullYear();
-               const currentMonth = new Date().getMonth() + 1; // Months are zero-indexed, so add 1
-   
-               // Validate the year is not in the past
-               if (parseInt(year) < currentYear) {
-                   formIsValid = false;
-                   errorMessages.expirationDate = 'your card is expired';
-               } else if (parseInt(year) === currentYear && parseInt(month) < currentMonth) {
-                   formIsValid = false;
-                   errorMessages.expirationDate = 'your card is expired';
-               }
+            const [month, year] = expirationDate.split('/');
+            const currentYear = new Date().getFullYear();
+            const currentMonth = new Date().getMonth() + 1; // Months are zero-indexed, so add 1
+        
+            // Convert 2-digit year to 4-digit year (assuming 21st century)
+            const fullYear = 2000 + parseInt(year); 
+        
+            // Validate the year is not in the past
+            if (fullYear < currentYear) {
+                formIsValid = false;
+                errorMessages.expirationDate = 'Your card is expired';
+            } else if (fullYear === currentYear && parseInt(month) < currentMonth) {
+                formIsValid = false;
+                errorMessages.expirationDate = 'Your card is expired';
+            }
            }
 
         const cvv = e.target.cvv.value;
