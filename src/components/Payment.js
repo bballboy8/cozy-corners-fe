@@ -10,7 +10,7 @@ const Payment = () => {
            cvv: '',
            amount: '',
        });
-   
+       const [expirationDate, setExpirationDate] = useState('');
        
        // Handle form submission
        const handleSubmit = (e) => {
@@ -19,8 +19,7 @@ const Payment = () => {
            // Validate all fields
            let formIsValid = true;
            let errorMessages = {};
-             
-   
+
            if (!e.target.nameOnCard.value) {
                formIsValid = false;
                errorMessages.nameOnCard = 'Name on card is required';
@@ -35,9 +34,8 @@ const Payment = () => {
                errorMessages.cardNumber = 'Card number must be 12 digits';
            }
 
-   
            const expirationDate = e.target.expirationDate.value;
-           const expirationDateRegex = /^(0[1-9]|1[0-2])\/\d{3}$/;
+           const expirationDateRegex = /^(0[1-9]|1[0-2])\/\d{2}$/;
            if (!expirationDate) {
                formIsValid = false;
                errorMessages.expirationDate = 'date is required';
@@ -85,11 +83,21 @@ const Payment = () => {
            }
        };
    
+       const handleExpirationDateChange = (e) => {
+        let inputValue = e.target.value.replace(/\D/g, ''); // Remove non-digit characters
+        if (inputValue.length <= 2) {
+            inputValue = inputValue.replace(/(\d{2})(\d{0,2})/, '$1/$2'); // Add / after two digits
+        } else if (inputValue.length > 2) {
+            inputValue = inputValue.replace(/(\d{2})(\d{2})(\d{0,2})/, '$1/$2$3'); // Keep / after two digits
+        }
+        setExpirationDate(inputValue); // Update the state with the formatted value
+    };
+
        return (
            <>
                <div className="container-fluid">
                    <div className="row no-gutters mt-5">
-                       <div className="col-md-6 right-side fix-height d-flex justify-content-end align-items-center">
+                       <div className="col-md-6 right-side fix-height d-flex justify-content-center align-items-center">
                            <div className="login-form dashboard mt-5">
                                <h2>Enter Card Details</h2>
                                <form onSubmit={handleSubmit}>
@@ -127,13 +135,15 @@ const Payment = () => {
                                            <div className="col-md-6 mb-2">
                                                <label className="mb-2">Expiration Date</label>
                                                <input
-                                                   type="text"
-                                                   placeholder="MM/YYYY"
-                                                   className="form-control"
-                                                   name="expirationDate"
-                                                   maxLength="7" 
-                                                   required
-                                               />
+                                                type="text"
+                                                placeholder="MM/YY"
+                                                className="form-control"
+                                                name="expirationDate"
+                                                maxLength="5" 
+                                                required
+                                                value={expirationDate}
+                                                onChange={handleExpirationDateChange} // Add onChange to update input value
+                                            />
                                                {errors.expirationDate && (
                                                    <small className="text-danger">{errors.expirationDate}</small>
                                                )}
@@ -176,7 +186,7 @@ const Payment = () => {
                                </form>
                            </div>
                        </div>
-                       <div className="col-md-6 left-side fix-height d-flex justify-content-start align-items-center">
+                       <div className="col-md-6 left-side fix-height d-flex justify-content-center align-items-center">
                            <img
                                src="/img/ozy.png" // Replace with your image URL
                                alt="Background"
@@ -184,12 +194,14 @@ const Payment = () => {
                            />
                        </div>
                        <div className='col-md-12 ms-5 ctm-width'>
-                            <h3>Card Details</h3>
+                            <h2 className='ms-1'>Card Details</h2>
                             <div className='bdrRadius'>
                                 <table className='table'>
                                     <thead>
                                         <tr>
-                                            <th className='bg-head'>Name</th>
+                                            <th className='bg-head'>First Name</th>
+                                            <th className='bg-head'>Last Name</th>
+                                            <th className='bg-head'>Address</th>
                                             <th className='bg-head'>Card Number</th>
                                             <th className='bg-head'>Expiry Date</th>
                                             <th className='bg-head'>CVV code</th>
@@ -198,21 +210,27 @@ const Payment = () => {
                                     </thead>
                                         <tbody>
                                         <tr>
-                                            <td>Sam</td>
+                                            <td>Luke</td>
+                                            <td>K</td>
+                                            <td >Address</td>
                                             <td>4567 XXXXX XXXX</td>
                                             <td>12/25</td>
                                             <td>123</td>
                                             <td><input type="button" className='btn btnsubmit' value="Pay Again"/></td>
                                         </tr>
                                         <tr>
-                                            <td>Sam</td>
+                                            <td>Luke</td>
+                                            <td>K</td>
+                                            <td>Address</td>
                                             <td>4567 XXXXX XXXX</td>
                                             <td>12/25</td>
                                             <td>123</td>
                                             <td><input type="button" className='btn btnsubmit' value="Pay Again"/></td>
                                         </tr>
                                         <tr>
-                                            <td>Sam</td>
+                                            <td>Luke</td>
+                                            <td>K</td>
+                                            <td>Address</td>
                                             <td>4567 XXXXX XXXX</td>
                                             <td>12/25</td>
                                             <td>123</td>

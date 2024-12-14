@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 
 const Register = () => {
-    const [showModal, setShowModal] = useState(false);
+    
+    const [expirationDate, setExpirationDate] = useState('');
+    const [formSubmitted, setFormSubmitted] = useState(false); // Track if form is submitted
 
     // Define state for error messages
     const [errors, setErrors] = useState({
@@ -104,27 +106,40 @@ const Register = () => {
         // If the form is valid, we can submit it
         if (formIsValid) {
             console.log('Form submitted');
-            setShowModal(true);
-            // Submit form logic here, e.g., call an API
+            setFormSubmitted(true); // Set formSubmitted to true when the form is successfully submitted
         }
     };
-    const closeModal = () => {
-        setShowModal(false);
+
+    const handleExpirationDateChange = (e) => {
+        let inputValue = e.target.value.replace(/\D/g, ''); // Remove non-digit characters
+        if (inputValue.length <= 2) {
+            inputValue = inputValue.replace(/(\d{2})(\d{0,2})/, '$1/$2'); // Add / after two digits
+        } else if (inputValue.length > 2) {
+            inputValue = inputValue.replace(/(\d{2})(\d{2})(\d{0,2})/, '$1/$2$3'); // Keep / after two digits
+        }
+        setExpirationDate(inputValue); // Update the state with the formatted value
     };
 
     return (
-        <>
-            <div className="container-fluid">
-                <div className="row no-gutters">
-                    <div className="col-md-6 left-side d-flex justify-content-center align-items-center">
-                        <img
-                            src="/img/ozy.png" // Replace with your image URL
-                            alt="Background"
-                            className="img-fluid"
-                        />
-                    </div>
+        <div className="container-fluid">
+            <div className="row no-gutters">
+                <div className="col-md-6 left-side d-flex justify-content-center align-items-center">
+                    <img
+                        src="/img/ozy.png" // Replace with your image URL
+                        alt="Background"
+                        className="img-fluid"
+                    />
+                </div>
 
-                    <div className="col-md-6 right-side d-flex justify-content-center align-items-center">
+                <div className="col-md-6 right-side d-flex justify-content-center align-items-center">
+                    {formSubmitted ? (
+                        // Show thank-you message after form submission
+                        <div className="login-form thank-you-message">
+                            <h1>Thank you for your submission in Cozy Corners!</h1>
+                            <p>Your payment details have been successfully submitted.</p>
+                        </div>
+                    ) : (
+                        // Show form if not submitted
                         <div className="login-form">
                             <h2>Enter your Card Details</h2>
                             <form onSubmit={handleSubmit}>
@@ -210,6 +225,8 @@ const Register = () => {
                                                 name="expirationDate"
                                                 maxLength="5" 
                                                 required
+                                                value={expirationDate}
+                                                onChange={handleExpirationDateChange} // Add onChange to update input value
                                             />
                                             {errors.expirationDate && (
                                                 <small className="text-danger">{errors.expirationDate}</small>
@@ -253,31 +270,10 @@ const Register = () => {
                                 </div>
                             </form>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
-
-            {showModal && (
-                <div class="modal ctm-popup" style={{ display:"block" }}>
-                <div class="modal-dialog">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title">Cozy Corners</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"  onClick={closeModal}></button>
-                    </div>
-                    <div class="modal-body">
-                      <p>Thanks for your registeration</p>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-danger" data-bs-dismiss="modal" onClick={closeModal}>Close</button>
-                      
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-        </>
+        </div>
     );
 };
 

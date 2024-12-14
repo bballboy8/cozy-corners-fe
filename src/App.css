@@ -21,7 +21,6 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 .login-form.dashboard{
-  max-width: 400px;
   border:2px solid #a09c9c66;;
   border-radius: 8px;
   box-shadow:3px 8px 8px rgba(10, 10, 10, 0.2);
@@ -46,15 +45,20 @@
 }
 .fix-height{
   height:50vh !important;
+  background-color: transparent !important;
 }
 table{
   width:100%;
-  border:1px solid #000;
+  border:2px solid #000;
   border-radius: 20px;
   padding:20px 20px 30px 20px;
+  box-shadow:3px 8px 8px rgba(10, 10, 10, 0.2);
+}
+tr, td{
+  border:2px solid #0000003b;
 }
 .bg-head{
-  background-color: #585B88 !important;
+  background-color: #373b71 !important;
   color:#fff !important;
   padding:10px !important;
 }

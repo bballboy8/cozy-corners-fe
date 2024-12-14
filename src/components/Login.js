@@ -49,7 +49,7 @@ const Login = () => {
 
                     <div className="col-md-6 login-right-side d-flex justify-content-center align-items-center">
                         <div className="login-form-section">
-                            <h2>Login</h2>
+                            <h2 className='ms-2'>Login</h2>
                             <form onSubmit={handleSubmit}>
                                 <div className="container">
                                     <div className="row">
