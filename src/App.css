@@ -44,7 +44,7 @@
   padding:20px 20px 30px 20px;
 }
 .fix-height{
-  height:50vh !important;
+  height:60vh !important;
   background-color: transparent !important;
 }
 table{
@@ -63,7 +63,7 @@ tr, td{
   padding:10px !important;
 }
 .ctm-width{
-  width: 90%;
+  width: 92%;
   margin-top:90px;
 }
 .bdrRadius{

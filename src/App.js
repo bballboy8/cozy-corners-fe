@@ -2,7 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import Register from './components/Register';
 import Login from './components/Login';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, useNavigate  } from 'react-router-dom';
 import Payment from './components/Payment';
 
 function App() {

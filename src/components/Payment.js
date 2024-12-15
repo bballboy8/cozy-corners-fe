@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Navigate } from 'react-router-dom';
 
 const Payment = () => {
-       // Define state for error messages
+       // Define state for error message
+       const dispatch = useDispatch();
        const [errors, setErrors] = useState({
-          
            nameOnCard: '',
            cardNumber: '',
            expirationDate: '',
            cvv: '',
            amount: '',
+           paymentOption: '',
        });
-       const [expirationDate, setExpirationDate] = useState('');
-       
+       const [expirationDate, setExpirationDate] = useState('');  
        // Handle form submission
        const handleSubmit = (e) => {
            e.preventDefault(); // Prevent default form submission
@@ -72,6 +74,12 @@ const Payment = () => {
             if (!e.target.amount.value) {
                formIsValid = false;
                errorMessages.amount = 'amount is required';
+           }
+
+           const paymentOption = e.target.paymentOption.value;
+           if (!paymentOption) {
+               formIsValid = false;
+               errorMessages.paymentOption = 'Please select a payment option';
            }
 
            setErrors(errorMessages);
@@ -163,6 +171,40 @@ const Payment = () => {
                                                    <small className="text-danger">{errors.cvv}</small>
                                                )}
                                            </div>
+                                           
+                                           <div className="col-md-12 mb-2">
+                                            <label className="mb-2">Payment Option</label>
+                                            <div className="d-flex">
+                                                <div className="form-check me-3">
+                                                    <input
+                                                        type="radio"
+                                                        id="chargeOption"
+                                                        name="paymentOption"
+                                                        value="charge"
+                                                        defaultChecked
+                                                        className="form-check-input"
+                                                    />
+                                                    <label htmlFor="chargeOption" className="form-check-label">
+                                                        Charge
+                                                    </label>
+                                                </div>
+                                                <div className="form-check">
+                                                    <input
+                                                        type="radio"
+                                                        id="holdOption"
+                                                        name="paymentOption"
+                                                        value="hold"
+                                                        className="form-check-input"
+                                                    />
+                                                    <label htmlFor="holdOption" className="form-check-label">
+                                                        Hold
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            {errors.paymentOption && (
+                                                <small className="text-danger">{errors.paymentOption}</small>
+                                            )}
+                                        </div>
                                            <div className="col-md-12 mb-2">
                                                <label className="mb-2">Enter Amount</label>
                                                <input

@@ -131,7 +131,7 @@ const Register = () => {
                     />
                 </div>
 
-                <div className="col-md-6 right-side d-flex justify-content-center align-items-center">
+                <div className="col-md-6 login-right-side right-side d-flex justify-content-center align-items-center">
                     {formSubmitted ? (
                         // Show thank-you message after form submission
                         <div className="login-form thank-you-message">
@@ -140,7 +140,7 @@ const Register = () => {
                         </div>
                     ) : (
                         // Show form if not submitted
-                        <div className="login-form">
+                        <div className="login-form login-form-section">
                             <h2>Enter your Card Details</h2>
                             <form onSubmit={handleSubmit}>
                                 <div className="container">

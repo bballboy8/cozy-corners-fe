@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux'; // Importing Redux hooks
+import { setUserName, setUserPassword } from '../actions/LoginActions'; // Import actions
 
 const Login = () => {
-    // Define state for error messages
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    // Get state from Redux store
+    const userName = useSelector((state) => state.login.userName);
+    const userPassword = useSelector((state) => state.login.userPassword);
+
     const [errors, setErrors] = useState({
         userName: '',
-        userPassword:''
+        userPassword: '',
     });
 
-    
     // Handle form submission
     const handleSubmit = (e) => {
         e.preventDefault(); // Prevent default form submission
@@ -16,12 +24,12 @@ const Login = () => {
         let formIsValid = true;
         let errorMessages = {};
 
-        if (!e.target.userName.value) {
+        if (!userName) {
             formIsValid = false;
-            errorMessages.userName = 'Username is required ';
+            errorMessages.userName = 'Username is required';
         }
 
-        if (!e.target.userPassword.value) {
+        if (!userPassword) {
             formIsValid = false;
             errorMessages.userPassword = 'Password is required';
         }
@@ -31,7 +39,7 @@ const Login = () => {
         // If the form is valid, we can submit it
         if (formIsValid) {
             console.log('Form submitted');
-            // Submit form logic here, e.g., call an API
+            navigate('/dashboard'); // Navigate to dashboard page
         }
     };
 
@@ -49,7 +57,7 @@ const Login = () => {
 
                     <div className="col-md-6 login-right-side d-flex justify-content-center align-items-center">
                         <div className="login-form-section">
-                            <h2 className='ms-2'>Login</h2>
+                            <h2 className="ms-2">Login</h2>
                             <form onSubmit={handleSubmit}>
                                 <div className="container">
                                     <div className="row">
@@ -59,8 +67,8 @@ const Login = () => {
                                                 type="text"
                                                 placeholder="Enter your User Name"
                                                 className="form-control"
-                                                name="userName"
-                                                required
+                                                value={userName} // Get value from Redux state
+                                                onChange={(e) => dispatch(setUserName(e.target.value))} // Dispatch action to set value
                                             />
                                             {errors.userName && (
                                                 <small className="text-danger">{errors.userName}</small>
@@ -73,8 +81,8 @@ const Login = () => {
                                                 type="password"
                                                 placeholder="Enter your password"
                                                 className="form-control"
-                                                name="Password"
-                                                required
+                                                value={userPassword} // Get value from Redux state
+                                                onChange={(e) => dispatch(setUserPassword(e.target.value))} // Dispatch action to set value
                                             />
                                             {errors.userPassword && (
                                                 <small className="text-danger">{errors.userPassword}</small>
