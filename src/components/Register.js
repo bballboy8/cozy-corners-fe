@@ -152,7 +152,7 @@ const Register = () => {
                     <img
                         src="/img/ozy.png" // Replace with your image URL
                         alt="Background"
-                        className="img-fluid"
+                        className="img-fluid register"
                     />
                 </div>
 
