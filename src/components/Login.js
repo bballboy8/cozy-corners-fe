@@ -65,7 +65,7 @@ const Login = () => {
                                             <label className="mb-2">User Name</label>
                                             <input
                                                 type="text"
-                                                placeholder="Enter your User Name"
+                                                placeholder="Enter your user name"
                                                 className="form-control"
                                                 value={userName} // Get value from Redux state
                                                 onChange={(e) => dispatch(setUserName(e.target.value))} // Dispatch action to set value

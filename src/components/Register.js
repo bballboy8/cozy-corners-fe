@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import axios from 'axios'; // Import axios
 
 const Register = () => {
     
@@ -27,7 +28,7 @@ const Register = () => {
     };
 
     // Handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault(); // Prevent default form submission
         // Validate all fields
         let formIsValid = true;
@@ -105,8 +106,32 @@ const Register = () => {
 
         // If the form is valid, we can submit it
         if (formIsValid) {
-            console.log('Form submitted');
-            setFormSubmitted(true); // Set formSubmitted to true when the form is successfully submitted
+            setFormSubmitted(true); // Set formSubmitted to true when the form is successfully submitted 
+            // const formData = {
+            //     firstName: e.target.firstName.value,
+            //     lastName: e.target.lastName.value,
+            //     Address: e.target.address.value,
+            //     cardHolderName: e.target.nameOnCard.value,
+            //     cardNo: e.target.cardNumber.value,
+            //     expiryDate: e.target.expirationDate.value,
+            //     cvvCode: e.target.cvv.value,
+            // };
+            // try {
+            //     // Send POST request using axios
+            //     const response = await axios.post('http://localhost:5000/api/creditCards/register', formData, {
+            //         headers: {
+            //             'Content-Type': 'application/json', // Set content type to JSON
+            //         },
+            //     });
+                
+            //     // Handle successful response
+            //     console.log(response.data);
+            //     setFormSubmitted(true); // Set formSubmitted to true when the form is successfully submitted 
+            // } catch (error) {
+            //     // Handle error response
+            //     console.error('Error submitting form:', error);
+            //     // Optionally set an error state to display an error message to the user
+            // }
         }
     };
 
@@ -141,7 +166,7 @@ const Register = () => {
                     ) : (
                         // Show form if not submitted
                         <div className="login-form login-form-section">
-                            <h2>Enter your Card Details</h2>
+                            <h2>Enter Your Card Details</h2>
                             <form onSubmit={handleSubmit}>
                                 <div className="container">
                                     <div className="row">
@@ -149,7 +174,7 @@ const Register = () => {
                                             <label className="mb-2">First Name</label>
                                             <input
                                                 type="text"
-                                                placeholder="Enter your First Name"
+                                                placeholder="Enter your first name"
                                                 className="form-control"
                                                 name="firstName"
                                                 required
@@ -163,7 +188,7 @@ const Register = () => {
                                             <label className="mb-2">Last Name</label>
                                             <input
                                                 type="text"
-                                                placeholder="Enter your Last Name"
+                                                placeholder="Enter your last name"
                                                 className="form-control"
                                                 name="lastName"
                                                 required
@@ -177,7 +202,7 @@ const Register = () => {
                                             <label className="mb-2">Address</label>
                                             <input
                                                 type="text"
-                                                placeholder="Enter your Credit card billing address"
+                                                placeholder="Enter your credit card billing address"
                                                 className="form-control"
                                                 name="address"
                                                 required
@@ -191,7 +216,7 @@ const Register = () => {
                                             <label className="mb-2">Name on Card</label>
                                             <input
                                                 type="text"
-                                                placeholder="Enter First and Last name"
+                                                placeholder="Enter first and last name"
                                                 className="form-control"
                                                 name="nameOnCard"
                                                 required
@@ -205,7 +230,7 @@ const Register = () => {
                                             <label className="mb-2">Credit Card Number</label>
                                             <input
                                                 type="number"
-                                                placeholder="Enter Credit card number"
+                                                placeholder="Enter credit card number"
                                                 className="form-control"
                                                 name="cardNumber"
                                                 maxLength="12" 
@@ -237,7 +262,7 @@ const Register = () => {
                                             <label className="mb-2">CVV</label>
                                             <input
                                                 type="number"
-                                                placeholder="Enter CVV code"
+                                                placeholder="Enter cvv code"
                                                 className="form-control"
                                                 name="cvv"
                                                 maxLength="3" 

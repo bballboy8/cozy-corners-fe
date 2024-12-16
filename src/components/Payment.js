@@ -115,7 +115,7 @@ const Payment = () => {
                                                <label className="mb-2">Enter Name</label>
                                                <input
                                                    type="text"
-                                                   placeholder="Enter First and Last name"
+                                                   placeholder="Enter first and last name"
                                                    className="form-control"
                                                    name="nameOnCard"
                                                    required
@@ -129,7 +129,7 @@ const Payment = () => {
                                                <label className="mb-2">Credit Card Number</label>
                                                <input
                                                    type="number"
-                                                   placeholder="Enter Credit card number"
+                                                   placeholder="Enter credit card number"
                                                    className="form-control"
                                                    name="cardNumber"
                                                    maxLength="12" 
@@ -161,7 +161,7 @@ const Payment = () => {
                                                <label className="mb-2">CVV</label>
                                                <input
                                                    type="text"
-                                                   placeholder="Enter CVV code"
+                                                   placeholder="Enter cvv code"
                                                    className="form-control"
                                                    name="cvv"
                                                    maxLength="3" 
@@ -206,7 +206,7 @@ const Payment = () => {
                                             )}
                                         </div>
                                            <div className="col-md-12 mb-2">
-                                               <label className="mb-2">Enter Amount</label>
+                                               <label className="mb-2">Enter amount</label>
                                                <input
                                                    type="number"
                                                    placeholder="Enter Amount"
