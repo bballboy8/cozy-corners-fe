@@ -1,14 +1,16 @@
-// src/actions/loginActions.js
-export const setUserName = (userName) => {
-    return {
-        type: 'SET_USERNAME',
-        payload: userName,
-    };
-};
+// src/actions/LoginActions.js
 
-export const setUserPassword = (userPassword) => {
-    return {
-        type: 'SET_USERPASSWORD',
-        payload: userPassword,
-    };
-};
+export const setUserName = (userName) => ({
+    type: 'SET_USERNAME',
+    payload: userName,
+});
+
+export const setUserPassword = (userPassword) => ({
+    type: 'SET_USERPASSWORD',
+    payload: userPassword,
+});
+
+export const setToken = (token) => ({
+    type: 'SET_TOKEN',
+    payload: token,
+});

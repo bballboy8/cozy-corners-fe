@@ -1,10 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
+import axios from 'axios'; // Import axios
 
 const Payment = () => {
        // Define state for error message
        const dispatch = useDispatch();
+       const [cards, setCards] = useState([]); // State to store card details
+       const [formData, setFormData] = useState({
+        nameOnCard: '',
+        cardNumber: '',
+        expirationDate: '',
+        cvv: '',
+        amount: '',
+        paymentOption: 'charge',
+    });
+
+
        const [errors, setErrors] = useState({
            nameOnCard: '',
            cardNumber: '',
@@ -14,6 +26,44 @@ const Payment = () => {
            paymentOption: '',
        });
        const [expirationDate, setExpirationDate] = useState('');  
+       
+       const handleInputChange = (e) => {
+         const { name, value } = e.target;
+            setFormData((prev) => ({ ...prev, [name]: value }));
+        };
+
+       useEffect(() => {
+        const fetchCards = async () => {
+            try {
+                const response = await axios.get('http://localhost:5000/api/creditCards/all'); // Replace with your API URL
+                console.log(response.data);
+                setCards(response.data.cards); // Set fetched cards to state
+            } catch (error) {
+                console.error('Error fetching card details:', error);
+            }
+        };
+
+        fetchCards();
+    }, []); // Empty dependency array ensures this runs only once
+
+    const handlePayAgain = async (cardId) => {
+        try {
+            const response = await axios.get(`http://localhost:5000/api/creditCards/${cardId}`);
+            const card = response.data.card; // Adjust based on API response structure
+            setFormData({
+                nameOnCard: `${card.firstName} ${card.lastName}`,
+                cardNumber: card.cardNo,
+                expirationDate: card.expiryDate,
+                cvv: card.cvvCode,
+                amount: '', // Keep amount empty for user to enter
+                paymentOption: 'charge', // Default payment option
+            });
+        } catch (error) {
+            console.error('Error fetching card details:', error);
+        }
+    };
+
+       
        // Handle form submission
        const handleSubmit = (e) => {
            e.preventDefault(); // Prevent default form submission
@@ -103,132 +153,105 @@ const Payment = () => {
 
        return (
            <>
-               <div className="container-fluid">
+               <div className="container-fluid dashboard-screen">
                    <div className="row no-gutters mt-5">
                        <div className="col-md-6 right-side fix-height d-flex justify-content-center align-items-center">
                            <div className="login-form dashboard mt-5">
                                <h2>Enter Card Details</h2>
                                <form onSubmit={handleSubmit}>
-                                   <div className="container">
-                                       <div className="row">
-                                           <div className="col-md-12 mb-2">
-                                               <label className="mb-2">Enter Name</label>
-                                               <input
-                                                   type="text"
-                                                   placeholder="Enter first and last name"
-                                                   className="form-control"
-                                                   name="nameOnCard"
-                                                   required
-                                               />
-                                               {errors.nameOnCard && (
-                                                   <small className="text-danger">{errors.nameOnCard}</small>
-                                               )}
-                                           </div>
-   
-                                           <div className="col-md-12 mb-2">
-                                               <label className="mb-2">Credit Card Number</label>
-                                               <input
-                                                   type="number"
-                                                   placeholder="Enter credit card number"
-                                                   className="form-control"
-                                                   name="cardNumber"
-                                                   maxLength="12" 
-                                                   required
-                                               />
-                                               {errors.cardNumber && (
-                                                   <small className="text-danger">{errors.cardNumber}</small>
-                                               )}
-                                           </div>
-   
-                                           <div className="col-md-6 mb-2">
-                                               <label className="mb-2">Expiration Date</label>
-                                               <input
+                                <div className="container">
+                                    <div className="row">
+                                        <div className="col-md-12 mb-2">
+                                            <label className="mb-2">Enter Name</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Enter first and last name"
+                                                className="form-control"
+                                                name="nameOnCard"
+                                                value={formData.nameOnCard}
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                            {errors.nameOnCard && (
+                                                <small className="text-danger">{errors.nameOnCard}</small>
+                                            )}
+                                        </div>
+
+                                        <div className="col-md-12 mb-2">
+                                            <label className="mb-2">Credit Card Number</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Enter credit card number"
+                                                className="form-control"
+                                                name="cardNumber"
+                                                value={formData.cardNumber}
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                            {errors.cardNumber && (
+                                                <small className="text-danger">{errors.cardNumber}</small>
+                                            )}
+                                        </div>
+
+                                        <div className="col-md-6 mb-2">
+                                            <label className="mb-2">Expiration Date</label>
+                                            <input
                                                 type="text"
                                                 placeholder="MM/YY"
                                                 className="form-control"
                                                 name="expirationDate"
-                                                maxLength="5" 
+                                                value={formData.expirationDate}
+                                                onChange={handleInputChange}
                                                 required
-                                                value={expirationDate}
-                                                onChange={handleExpirationDateChange} // Add onChange to update input value
                                             />
-                                               {errors.expirationDate && (
-                                                   <small className="text-danger">{errors.expirationDate}</small>
-                                               )}
-                                           </div>
-   
-                                           <div className="col-md-6 mb-2">
-                                               <label className="mb-2">CVV</label>
-                                               <input
-                                                   type="text"
-                                                   placeholder="Enter cvv code"
-                                                   className="form-control"
-                                                   name="cvv"
-                                                   maxLength="3" 
-                                                   required
-                                               />
-                                               {errors.cvv && (
-                                                   <small className="text-danger">{errors.cvv}</small>
-                                               )}
-                                           </div>
-                                           
-                                           <div className="col-md-12 mb-2">
-                                            <label className="mb-2">Payment Option</label>
-                                            <div className="d-flex">
-                                                <div className="form-check me-3">
-                                                    <input
-                                                        type="radio"
-                                                        id="chargeOption"
-                                                        name="paymentOption"
-                                                        value="charge"
-                                                        defaultChecked
-                                                        className="form-check-input"
-                                                    />
-                                                    <label htmlFor="chargeOption" className="form-check-label">
-                                                        Charge
-                                                    </label>
-                                                </div>
-                                                <div className="form-check">
-                                                    <input
-                                                        type="radio"
-                                                        id="holdOption"
-                                                        name="paymentOption"
-                                                        value="hold"
-                                                        className="form-check-input"
-                                                    />
-                                                    <label htmlFor="holdOption" className="form-check-label">
-                                                        Hold
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            {errors.paymentOption && (
-                                                <small className="text-danger">{errors.paymentOption}</small>
+                                            {errors.expirationDate && (
+                                                <small className="text-danger">{errors.expirationDate}</small>
                                             )}
                                         </div>
-                                           <div className="col-md-12 mb-2">
-                                               <label className="mb-2">Enter amount</label>
-                                               <input
-                                                   type="number"
-                                                   placeholder="Enter Amount"
-                                                   className="form-control"
-                                                   name="amount"
-                                                   required
-                                               />
-                                               {errors.cvv && (
-                                                   <small className="text-danger">{errors.amount}</small>
-                                               )}
-                                           </div>
-                                           <div className="col-md-12">
-                                               <button type="submit" className="btn btnsubmit w-100 mt-2">
-                                                   Pay Now
-                                               </button>
-                                           </div>
-                                       </div>
-                                   </div>
-                               </form>
+
+                                        <div className="col-md-6 mb-2">
+                                            <label className="mb-2">CVV</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Enter cvv code"
+                                                className="form-control"
+                                                name="cvv"
+                                                value={formData.cvv}
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                            {errors.cvv && (
+                                                <small className="text-danger">{errors.cvv}</small>
+                                            )}
+                                        </div>
+
+                                        <div className="col-md-12 mb-2">
+                                            <label className="mb-2">Enter Amount</label>
+                                            <input
+                                                type="number"
+                                                placeholder="Enter Amount"
+                                                className="form-control"
+                                                name="amount"
+                                                value={formData.amount}
+                                                onChange={handleInputChange}
+                                                required
+                                            />
+                                            {errors.amount && (
+                                                <small className="text-danger">{errors.amount}</small>
+                                            )}
+                                        </div>
+
+                                        <div className="col-md-12">
+                                            <button type="submit" className="btn btnsubmit w-100 mt-2">
+                                                Pay Now
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
                            </div>
                        </div>
-                       <div className="col-md-6 left-side fix-height d-flex justify-content-center align-items-center">
+                       <div className="col-md-6 dashboard-right-side left-side fix-height d-flex justify-content-center align-items-center">
                            <img
                                src="/img/ozy.png" // Replace with your image URL
                                alt="Background"
@@ -238,11 +261,13 @@ const Payment = () => {
                        <div className='col-md-12 ms-5 ctm-width'>
                             <h2 className='ms-1'>Card Details</h2>
                             <div className='bdrRadius'>
+                                <div className="table-responsive">
                                 <table className='table'>
                                     <thead>
                                         <tr>
                                             <th className='bg-head'>First Name</th>
                                             <th className='bg-head'>Last Name</th>
+                                            <th className='bg-head'>Phone No</th>
                                             <th className='bg-head'>Address</th>
                                             <th className='bg-head'>Card Number</th>
                                             <th className='bg-head'>Expiry Date</th>
@@ -250,36 +275,29 @@ const Payment = () => {
                                             <th className='bg-head'>Action</th>
                                         </tr>
                                     </thead>
-                                        <tbody>
-                                        <tr>
-                                            <td>Luke</td>
-                                            <td>K</td>
-                                            <td >Address</td>
-                                            <td>4567 XXXXX XXXX</td>
-                                            <td>12/25</td>
-                                            <td>123</td>
-                                            <td><input type="button" className='btn btnsubmit' value="Pay Again"/></td>
+                                    <tbody>
+                                    {cards.map((card, index) => (
+                                        <tr key={index}>
+                                            <td>{card.firstName}</td>
+                                            <td>{card.lastName}</td>
+                                            <td>{card.contact}</td>
+                                            <td>{card.Address}</td>
+                                            <td>{`**** **** **** ${card.cardNo.slice(-4)}`}</td>
+                                            <td>{card.expiryDate}</td>
+                                            <td>{card.cvvCode}</td>
+                                            <td>
+                                                <button
+                                                    className="btn btnsubmit"
+                                                    onClick={() => handlePayAgain(card.id)}
+                                                >
+                                                    Pay Again
+                                                </button>
+                                            </td>
                                         </tr>
-                                        <tr>
-                                            <td>Luke</td>
-                                            <td>K</td>
-                                            <td>Address</td>
-                                            <td>4567 XXXXX XXXX</td>
-                                            <td>12/25</td>
-                                            <td>123</td>
-                                            <td><input type="button" className='btn btnsubmit' value="Pay Again"/></td>
-                                        </tr>
-                                        <tr>
-                                            <td>Luke</td>
-                                            <td>K</td>
-                                            <td>Address</td>
-                                            <td>4567 XXXXX XXXX</td>
-                                            <td>12/25</td>
-                                            <td>123</td>
-                                            <td><input type="button" className='btn btnsubmit' value="Pay Again"/></td>
-                                        </tr>
-                                        </tbody>
+                                    ))}
+                                </tbody>
                                 </table>
+                                </div>
                             </div>
                        </div>
                    </div>

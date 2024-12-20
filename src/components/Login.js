@@ -1,23 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux'; // Importing Redux hooks
-import { setUserName, setUserPassword } from '../actions/LoginActions'; // Import actions
+import { setUserName, setToken  } from '../actions/LoginActions'; // Import actions
+import axios from 'axios'; // Import axios
 
 const Login = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const [userName, setUserName] = useState(''); // Local state for userName
+    const [userPassword, setUserPassword] = useState(''); // Local state for userPassword
+    
+    
+    const [formSubmitted, setFormSubmitted] = useState(false);
 
-    // Get state from Redux store
-    const userName = useSelector((state) => state.login.userName);
-    const userPassword = useSelector((state) => state.login.userPassword);
+    
 
     const [errors, setErrors] = useState({
         userName: '',
         userPassword: '',
+        loginError: '', // Added state for login error message
     });
 
     // Handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault(); // Prevent default form submission
 
         // Validate all fields
@@ -35,17 +40,51 @@ const Login = () => {
         }
 
         setErrors(errorMessages);
-
+        console.log(userName,'---', userPassword);
         // If the form is valid, we can submit it
         if (formIsValid) {
-            console.log('Form submitted');
-            navigate('/dashboard'); // Navigate to dashboard page
+            const formData = {
+                email: userName, // Get value from local state
+                password: userPassword, // Get value from local state
+            };
+            try {
+                // Send POST request using axios
+                const response = await axios.post('http://localhost:5000/api/auth/login', formData, {
+                    headers: {
+                        'Content-Type': 'application/json', // Set content type to JSON
+                    },
+                });
+                
+                // Handle successful response
+                dispatch(setToken(response.data.token));
+
+                setFormSubmitted(true); // Set formSubmitted to true when the form is successfully submitted 
+                navigate('/dashboard'); // Navigate to dashboard page
+            } catch (error) {
+                console.log(error.response);
+                if (error.response && error.response.status === 400) {
+                    // If the status code is 401 (Unauthorized), display login error message
+                    setErrors({
+                        ...errors,
+                        loginError: 'Invalid username or password. Please try again.',
+                    });
+                } else {
+                    // Handle other errors (e.g., server errors)
+                    setErrors({
+                        ...errors,
+                        loginError: 'An error occurred. Please try again later.',
+                    });
+                }
+            }
+
+            
+            
         }
     };
 
     return (
         <>
-            <div className="container-fluid">
+            <div className="container-fluid login-screen">
                 <div className="row no-gutters">
                     <div className="col-md-6 left-side d-flex justify-content-center align-items-center">
                         <img
@@ -67,8 +106,8 @@ const Login = () => {
                                                 type="text"
                                                 placeholder="Enter your user name"
                                                 className="form-control"
-                                                value={userName} // Get value from Redux state
-                                                onChange={(e) => dispatch(setUserName(e.target.value))} // Dispatch action to set value
+                                                value={userName} // Get value from local state
+                                                onChange={(e) => setUserName(e.target.value)} // Dispatch action to set value
                                             />
                                             {errors.userName && (
                                                 <small className="text-danger">{errors.userName}</small>
@@ -81,13 +120,18 @@ const Login = () => {
                                                 type="password"
                                                 placeholder="Enter your password"
                                                 className="form-control"
-                                                value={userPassword} // Get value from Redux state
-                                                onChange={(e) => dispatch(setUserPassword(e.target.value))} // Dispatch action to set value
+                                                value={userPassword} // Get value from local state
+                                                onChange={(e) => setUserPassword(e.target.value)}  // Dispatch action to set value
                                             />
                                             {errors.userPassword && (
                                                 <small className="text-danger">{errors.userPassword}</small>
                                             )}
                                         </div>
+                                        {errors.loginError && (
+                                            <div className="col-md-12 mb-3">
+                                                <small className="text-danger">{errors.loginError}</small>
+                                            </div>
+                                        )}
                                         <div className="col-md-12 mt-3">
                                             <button type="submit" className="btn btnsubmit w-100">
                                                 Login

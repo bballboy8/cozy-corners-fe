@@ -14,7 +14,7 @@
 }
 .login-form {
   width: 100%;  /* Adjust form width */
-  max-width: 600px;
+  max-width: 750px;
   padding: 20px;
   border:1px solid #a09c9c;
   border-radius: 8px;
@@ -25,8 +25,9 @@
   border-radius: 8px;
   box-shadow:3px 8px 8px rgba(10, 10, 10, 0.2);
 }
-.login-form h2 {
+.login-form h2, .login-screen h2 {
   margin-bottom: 20px;
+  margin-left: 10px;
 }
 
 .form-group {
@@ -82,6 +83,101 @@ th, td{
   position: absolute;
   top:35%;
 }
-.col-md-6.left-side .img-fluid.register {
+.col-md-6.left-side .img-fluid.register,  .col-md-5.left-side .img-fluid.register{
   max-width: 40% !important;
+}
+
+.table-responsive {
+  overflow-x: auto; /* Allows horizontal scroll */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on mobile */
+}
+
+table {
+  width: 100%;
+  border: 2px solid #000;
+  border-radius: 20px;
+  padding: 20px 20px 30px 20px;
+  box-shadow: 3px 8px 8px rgba(10, 10, 10, 0.2);
+  table-layout: auto; /* Ensure the table content adjusts properly */
+}
+
+/* Ensure that the table cells are properly aligned */
+th, td {
+  text-align: center;
+  padding: 10px;
+}
+.checkbox-wrapper {
+  display: flex;
+  align-items: flex-start; 
+  
+}
+
+/* Style for the checkbox itself */
+.checkbox-wrapper input[type="checkbox"] {
+  margin-right: 10px; /* Space between the checkbox and the text */
+  margin-top:5px;
+  align-self: flex-start;
+}
+small.text-danger {
+  display: block;
+  margin-top: 5px; /* Adds space between the checkbox text and error message */
+}
+/* Style for the text that follows the checkbox */
+.checkbox-text {
+  font-size: 14px; /* Adjust font size */
+  line-height: 1.5; /* Add some spacing between lines of text */
+}
+
+/* Add a smaller margin between links */
+.checkbox-text a {
+  font-size: 14px; /* Font size for links */
+  text-decoration: none; /* Removes underline from links */
+}
+
+
+@media screen and (max-width: 768px) {
+  .register-screen .left-side{
+    height:30vh;
+  }
+  .register-screen .login-right-side, .login-screen .login-right-side{
+    align-items: baseline !important;
+    background-image: none;
+    padding: 20px;
+    height: auto;
+  }
+  .login-screen .left-side{
+      height:50vh;
+  }
+  .dashboard-screen .fix-height{
+    height:auto !important;
+    align-items: baseline !important;
+    margin:0 !important;
+  }
+  .dashboard-screen .fix-height .dashboard, .dashboard-screen .row{
+    margin-top:10px !important;
+  }
+  .dashboard-screen .dashboard-right-side{
+    display: none !important;
+  }
+  .table-responsive {
+    width: 100%;
+    overflow-x: auto; /* Enable horizontal scrolling */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    margin-bottom: 15px;
+  }
+
+  /* Adjust table styling for smaller devices */
+  table {
+    width: 100%;
+    border: none; /* Optional: Remove table border on smaller screens */
+  }
+
+  /* Adjust table headings and cells */
+  th, td {
+    font-size: 12px; /* Reduce font size for mobile */
+    padding: 8px;
+  }
+  .dashboard-screen .ctm-width{
+      margin:50px 10px 0px 10px !important;
+  }
 }

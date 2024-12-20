@@ -5,26 +5,28 @@ const Register = () => {
     
     const [expirationDate, setExpirationDate] = useState('');
     const [formSubmitted, setFormSubmitted] = useState(false); // Track if form is submitted
-
+    const [contact, setContact] = useState(''); 
     // Define state for error messages
     const [errors, setErrors] = useState({
         firstName: '',
         lastName: '',
         address: '',
+        contact:'',
         nameOnCard: '',
         cardNumber: '',
         expirationDate: '',
         cvv: '',
-        isChecked: '',
+        isChecked1: '',
+        isChecked2: '',
     });
 
     // Handle checkbox change
     const handleCheckboxChange = (e) => {
-        const isChecked = e.target.checked;
-        setErrors({
-            ...errors,
-            isChecked: isChecked ? '' : 'You must agree to the terms',
-        });
+        const { name, checked } = e.target;
+        setErrors((prevErrors) => ({
+            ...prevErrors,
+            [name]: checked ? '' : `You must agree to the terms`
+        }));
     };
 
     // Handle form submission
@@ -43,6 +45,16 @@ const Register = () => {
             formIsValid = false;
             errorMessages.lastName = 'Last name is required';
         }
+
+       // Validate contact number (mobile number)
+       const contactRegex = /^[0-9+ -]*$/; // Allows digits, plus, and hyphen
+       if (!contact) {
+           formIsValid = false;
+           errorMessages.contact = 'Phone number is required';
+       } else if (!contactRegex.test(contact)) {
+           formIsValid = false;
+           errorMessages.contact = 'Phone number can only contain digits, +, and -';
+       }
 
         if (!e.target.address.value) {
             formIsValid = false;
@@ -97,41 +109,58 @@ const Register = () => {
             errorMessages.cvv = 'CVV must be 3 digits';
         }
 
-        if (!e.target.isChecked.checked) {
+        if (!e.target.isChecked1.checked) {
             formIsValid = false;
-            errorMessages.isChecked = 'You must agree to the terms';
+            errorMessages.isChecked1 = 'You must agree to the age terms';
         }
+
+        if (!e.target.isChecked2.checked) {
+            formIsValid = false;
+            errorMessages.isChecked2 = 'You must agree that you have read and agreed with the terms ';
+        }
+
 
         setErrors(errorMessages);
 
         // If the form is valid, we can submit it
         if (formIsValid) {
-            setFormSubmitted(true); // Set formSubmitted to true when the form is successfully submitted 
-            // const formData = {
-            //     firstName: e.target.firstName.value,
-            //     lastName: e.target.lastName.value,
-            //     Address: e.target.address.value,
-            //     cardHolderName: e.target.nameOnCard.value,
-            //     cardNo: e.target.cardNumber.value,
-            //     expiryDate: e.target.expirationDate.value,
-            //     cvvCode: e.target.cvv.value,
-            // };
-            // try {
-            //     // Send POST request using axios
-            //     const response = await axios.post('http://localhost:5000/api/creditCards/register', formData, {
-            //         headers: {
-            //             'Content-Type': 'application/json', // Set content type to JSON
-            //         },
-            //     });
+            //setFormSubmitted(true); // Set formSubmitted to true when the form is successfully submitted 
+            const formData = {
+                firstName: e.target.firstName.value,
+                lastName: e.target.lastName.value,
+                contact:e.target.contact.value,
+                Address: e.target.address.value,
+                cardHolderName: e.target.nameOnCard.value,
+                cardNo: e.target.cardNumber.value,
+                expiryDate: e.target.expirationDate.value,
+                cvvCode: e.target.cvv.value,
+
+            };
+            try {
+                // Send POST request using axios
+                const response = await axios.post('http://localhost:5000/api/creditCards/register', formData, {
+                    headers: {
+                        'Content-Type': 'application/json', // Set content type to JSON
+                    },
+                });
                 
-            //     // Handle successful response
-            //     console.log(response.data);
-            //     setFormSubmitted(true); // Set formSubmitted to true when the form is successfully submitted 
-            // } catch (error) {
-            //     // Handle error response
-            //     console.error('Error submitting form:', error);
-            //     // Optionally set an error state to display an error message to the user
-            // }
+                // Handle successful response
+                console.log(response.data);
+                setFormSubmitted(true); // Set formSubmitted to true when the form is successfully submitted 
+            } catch (error) {
+                // Handle error response
+                console.error('Error submitting form:', error);
+                // Optionally set an error state to display an error message to the user
+            }
+        }
+    };
+
+    const handleContactChange = (e) => {
+        const inputValue = e.target.value;
+        // Only allow digits, +, and - in the input
+        const contactRegex = /^[0-9+ -]*$/;
+        if (contactRegex.test(inputValue)) {
+            setContact(inputValue); // Update state with valid input
         }
     };
 
@@ -146,9 +175,9 @@ const Register = () => {
     };
 
     return (
-        <div className="container-fluid">
+        <div className="container-fluid register-screen">
             <div className="row no-gutters">
-                <div className="col-md-6 left-side d-flex justify-content-center align-items-center">
+                <div className="col-md-5 left-side d-flex justify-content-center align-items-center">
                     <img
                         src="/img/ozy.png" // Replace with your image URL
                         alt="Background"
@@ -156,7 +185,7 @@ const Register = () => {
                     />
                 </div>
 
-                <div className="col-md-6 login-right-side right-side d-flex justify-content-center align-items-center">
+                <div className="col-md-7 login-right-side right-side d-flex justify-content-center align-items-center">
                     {formSubmitted ? (
                         // Show thank-you message after form submission
                         <div className="login-form thank-you-message">
@@ -171,7 +200,7 @@ const Register = () => {
                                 <div className="container">
                                     <div className="row">
                                         <div className="col-md-6 mb-2">
-                                            <label className="mb-2">First Name</label>
+                                            <label className="mb-1">First Name</label>
                                             <input
                                                 type="text"
                                                 placeholder="Enter your first name"
@@ -185,7 +214,7 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-6 mb-2">
-                                            <label className="mb-2">Last Name</label>
+                                            <label className="mb-1">Last Name</label>
                                             <input
                                                 type="text"
                                                 placeholder="Enter your last name"
@@ -197,9 +226,23 @@ const Register = () => {
                                                 <small className="text-danger">{errors.lastName}</small>
                                             )}
                                         </div>
-
                                         <div className="col-md-12 mb-2">
-                                            <label className="mb-2">Address</label>
+                                            <label className="mb-1">Phone Number</label>
+                                            <input
+                                                type="text"
+                                                placeholder="Enter your phone number"
+                                                className="form-control"
+                                                name="contact"
+                                                value={contact}
+                                                onChange={handleContactChange} 
+                                                required
+                                            />
+                                            {errors.contact && (
+                                                <small className="text-danger">{errors.contact}</small>
+                                            )}
+                                        </div>
+                                        <div className="col-md-12 mb-2">
+                                            <label className="mb-1">Address</label>
                                             <input
                                                 type="text"
                                                 placeholder="Enter your credit card billing address"
@@ -213,7 +256,7 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-12 mb-2">
-                                            <label className="mb-2">Name on Card</label>
+                                            <label className="mb-1">Name on Card</label>
                                             <input
                                                 type="text"
                                                 placeholder="Enter first and last name"
@@ -227,7 +270,7 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-12 mb-2">
-                                            <label className="mb-2">Credit Card Number</label>
+                                            <label className="mb-1">Credit Card Number</label>
                                             <input
                                                 type="number"
                                                 placeholder="Enter credit card number"
@@ -242,7 +285,7 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-6 mb-2">
-                                            <label className="mb-2">Expiration Date</label>
+                                            <label className="mb-1">Expiration Date</label>
                                             <input
                                                 type="text"
                                                 placeholder="MM/YY"
@@ -259,7 +302,7 @@ const Register = () => {
                                         </div>
 
                                         <div className="col-md-6 mb-2">
-                                            <label className="mb-2">CVV</label>
+                                            <label className="mb-1">CVV</label>
                                             <input
                                                 type="number"
                                                 placeholder="Enter cvv code"
@@ -273,20 +316,41 @@ const Register = () => {
                                             )}
                                         </div>
 
-                                        <div className="col-md-12 mb-2">
-                                            <input
-                                                type="checkbox"
-                                                className="ml-1"
-                                                name="isChecked"
-                                                onChange={handleCheckboxChange}
-                                            />
-                                            I certify that I am of the age of majority in my respective jurisdiction or have permission from a legal parent or guardian to use this site. <br/>
-                                            {errors.isChecked && (
-                                                <small className="text-danger">{errors.isChecked}</small>
-                                            )}
+                                        <div className="col-md-12 mb-2 mt-2">
+                                            <div className="checkbox-wrapper">
+                                                <input
+                                                    type="checkbox"
+                                                    className="ml-1"
+                                                    name="isChecked1"
+                                                    onChange={handleCheckboxChange}
+                                                />
+                                                <span className="checkbox-text">I certify that I am of the age of majority in my respective jurisdiction or have permission from a legal parent or guardian to use this site. </span><br/>
+                                                </div>
+                                                {errors.isChecked1 && (
+                                                    <small className="text-danger ms-4">{errors.isChecked1}</small>
+                                                )}
+                                            
                                         </div>
-
-                                        <div className="col-md-12">
+                                        <div className="col-md-12 mb-2 mt-2">
+                                            <div className="checkbox-wrapper">
+                                                <input
+                                                        type="checkbox"
+                                                        className="ml-1"
+                                                        name="isChecked2"
+                                                        onChange={handleCheckboxChange}
+                                                    />
+                                                <span className="checkbox-text">Check here to indicate that you have read and agreed to the terms of 
+                                                        <a href="/doc/global_privacy_statement.pdf"> Global Privacy Statement, </a> 
+                                                        <a href="/doc/site_usage_agreement.pdf">Site Usage Agreement </a> and 
+                                                        <a href="/doc/Rules_and_Restrictions.pdf"> Rules and Restrictions </a><br/>
+                                                </span>
+                                                </div>
+                                                {errors.isChecked2 && (
+                                                    <small className="text-danger ms-4">{errors.isChecked2}</small>
+                                                )}
+                                            
+                                        </div>
+                                        <div className="col-md-12 mt-2">
                                             <button type="submit" className="btn btnsubmit w-100">
                                                 Submit
                                             </button>
