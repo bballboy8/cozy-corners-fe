@@ -28,6 +28,7 @@ const Payment = () => {
        });
        
        const [expirationDate, setExpirationDate] = useState('');  
+
        const stripe = useStripe();
        const elements = useElements();
 
@@ -39,7 +40,7 @@ const Payment = () => {
        useEffect(() => {
         const fetchCards = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/creditCards/all'); // Replace with your API URL
+                const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}creditCards/all`); // Replace with your API URL
                 console.log(response.data);
                 setCards(response.data.cards); // Set fetched cards to state
             } catch (error) {
@@ -52,7 +53,7 @@ const Payment = () => {
 
     const handlePayAgain = async (cardId) => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/creditCards/${cardId}`);
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}creditCards/${cardId}`);
             const card = response.data.card; // Adjust based on API response structure
             setFormData({
                 nameOnCard: `${card.firstName} ${card.lastName}`,
@@ -153,7 +154,7 @@ const Payment = () => {
             }
             try {
                 console.log()
-                const response = await axios.post('http://localhost:5000/api/creditCards/charge-payment', {
+                const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}creditCards/charge-payment`, {
                     token: token.id,
                     amount: formData.amount, // Amount in cents
                 });
