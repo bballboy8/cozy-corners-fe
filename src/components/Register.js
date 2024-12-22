@@ -69,9 +69,9 @@ const Register = () => {
         if (!cardNumber) {
             formIsValid = false;
             errorMessages.cardNumber = 'Credit card number is required';
-        } else if (cardNumber.length !== 12) {
+        } else if (cardNumber.length !== 16) {
             formIsValid = false;
-            errorMessages.cardNumber = 'Card number must be 12 digits';
+            errorMessages.cardNumber = 'Card number must be 16 digits';
         }
 
         const expirationDate = e.target.expirationDate.value;

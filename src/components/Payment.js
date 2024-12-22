@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
 import axios from 'axios'; // Import axios
-
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 const Payment = () => {
        // Define state for error message
        const dispatch = useDispatch();
@@ -25,8 +26,11 @@ const Payment = () => {
            amount: '',
            paymentOption: '',
        });
-       const [expirationDate, setExpirationDate] = useState('');  
        
+       const [expirationDate, setExpirationDate] = useState('');  
+       const stripe = useStripe();
+       const elements = useElements();
+
        const handleInputChange = (e) => {
          const { name, value } = e.target;
             setFormData((prev) => ({ ...prev, [name]: value }));
@@ -65,12 +69,16 @@ const Payment = () => {
 
        
        // Handle form submission
-       const handleSubmit = (e) => {
+       const handleSubmit = async (e) => {
            e.preventDefault(); // Prevent default form submission
    
            // Validate all fields
            let formIsValid = true;
            let errorMessages = {};
+           if (!stripe || !elements) {
+            // Stripe.js has not yet loaded
+                return;
+            }
 
            if (!e.target.nameOnCard.value) {
                formIsValid = false;
@@ -81,9 +89,9 @@ const Payment = () => {
            if (!cardNumber) {
                formIsValid = false;
                errorMessages.cardNumber = 'Credit card number is required';
-           } else if (cardNumber.length !== 12) {
+           } else if (cardNumber.length !== 16) {
                formIsValid = false;
-               errorMessages.cardNumber = 'Card number must be 12 digits';
+               errorMessages.cardNumber = 'Card number must be 16 digits';
            }
 
            const expirationDate = e.target.expirationDate.value;
@@ -136,7 +144,30 @@ const Payment = () => {
    
            // If the form is valid, we can submit it
            if (formIsValid) {
-               console.log('Form submitted');
+            const cardElement = elements.getElement(CardElement);
+            const { token, error } = await stripe.createToken(cardElement);
+            if (error) {
+                console.error(error);
+                setErrors({ general: error.message });
+                return;
+            }
+            try {
+                console.log()
+                const response = await axios.post('http://localhost:5000/api/creditCards/charge-payment', {
+                    token: token.id,
+                    amount: formData.amount, // Amount in cents
+                });
+
+                if (response.data.success) {
+                    alert('Payment successful');
+                } else {
+                    setErrors({ general: response.data.message });
+                }
+            } catch (error) {
+                setErrors({ general: 'Payment failed. Please try again.' });
+                console.error('Error:', error);
+            }
+            
                // Submit form logic here, e.g., call an API
            }
        };
@@ -149,32 +180,31 @@ const Payment = () => {
             inputValue = inputValue.replace(/(\d{2})(\d{2})(\d{0,2})/, '$1/$2$3'); // Keep / after two digits
         }
         setExpirationDate(inputValue); // Update the state with the formatted value
+
+
     };
 
        return (
-           <>
-               <div className="container-fluid dashboard-screen">
-                   <div className="row no-gutters mt-5">
-                       <div className="col-md-6 right-side fix-height d-flex justify-content-center align-items-center">
-                           <div className="login-form dashboard mt-5">
-                               <h2>Enter Card Details</h2>
-                               <form onSubmit={handleSubmit}>
+        <>
+            <div className="container-fluid dashboard-screen">
+                <div className="row no-gutters mt-4">
+                    <div className="col-md-6 right-side fix-height d-flex justify-content-center align-items-center">
+                        <div className="login-form dashboard mt-5">
+                            <h2>Enter Card Details</h2>
+                            <form onSubmit={handleSubmit}>
                                 <div className="container">
                                     <div className="row">
                                         <div className="col-md-12 mb-2">
-                                            <label className="mb-2">Enter Name</label>
+                                            <label className="mb-2">Name on Card</label>
                                             <input
                                                 type="text"
                                                 placeholder="Enter first and last name"
                                                 className="form-control"
                                                 name="nameOnCard"
                                                 value={formData.nameOnCard}
-                                                onChange={handleInputChange}
-                                                required
+                                                onChange={(e) => setFormData({ ...formData, nameOnCard: e.target.value })}
                                             />
-                                            {errors.nameOnCard && (
-                                                <small className="text-danger">{errors.nameOnCard}</small>
-                                            )}
+                                            {errors.nameOnCard && <small className="text-danger">{errors.nameOnCard}</small>}
                                         </div>
 
                                         <div className="col-md-12 mb-2">
@@ -185,12 +215,9 @@ const Payment = () => {
                                                 className="form-control"
                                                 name="cardNumber"
                                                 value={formData.cardNumber}
-                                                onChange={handleInputChange}
-                                                required
+                                                onChange={(e) => setFormData({ ...formData, cardNumber: e.target.value })}
                                             />
-                                            {errors.cardNumber && (
-                                                <small className="text-danger">{errors.cardNumber}</small>
-                                            )}
+                                            {errors.cardNumber && <small className="text-danger">{errors.cardNumber}</small>}
                                         </div>
 
                                         <div className="col-md-6 mb-2">
@@ -201,28 +228,47 @@ const Payment = () => {
                                                 className="form-control"
                                                 name="expirationDate"
                                                 value={formData.expirationDate}
-                                                onChange={handleInputChange}
-                                                required
+                                                onChange={handleExpirationDateChange}
                                             />
-                                            {errors.expirationDate && (
-                                                <small className="text-danger">{errors.expirationDate}</small>
-                                            )}
+                                            {errors.expirationDate && <small className="text-danger">{errors.expirationDate}</small>}
                                         </div>
 
                                         <div className="col-md-6 mb-2">
                                             <label className="mb-2">CVV</label>
                                             <input
                                                 type="text"
-                                                placeholder="Enter cvv code"
+                                                placeholder="Enter CVV code"
                                                 className="form-control"
                                                 name="cvv"
                                                 value={formData.cvv}
-                                                onChange={handleInputChange}
-                                                required
+                                                onChange={(e) => setFormData({ ...formData, cvv: e.target.value })}
                                             />
-                                            {errors.cvv && (
-                                                <small className="text-danger">{errors.cvv}</small>
-                                            )}
+                                            {errors.cvv && <small className="text-danger">{errors.cvv}</small>}
+                                        </div>
+                                        <div className="col-md-12 mb-2">
+                                            <label className="mb-2">Payment Option</label>
+                                            <div>
+                                                <input
+                                                    type="radio"
+                                                    id="charge"
+                                                    name="paymentOption"
+                                                    value="charge"
+                                                    checked={formData.paymentOption === 'charge'}
+                                                    onChange={(e) => setFormData({ ...formData, paymentOption: e.target.value })}
+                                                />
+                                                <label htmlFor="charge" className="ms-2 me-2">Charge</label>
+
+                                                <input
+                                                    type="radio"
+                                                    id="hold"
+                                                    name="paymentOption"
+                                                    value="hold"
+                                                    checked={formData.paymentOption === 'hold'}
+                                                    onChange={(e) => setFormData({ ...formData, paymentOption: e.target.value })}
+                                                />
+                                                <label htmlFor="hold" className="ms-2">Hold</label>
+                                            </div>
+                                            {errors.paymentOption && <small className="text-danger">{errors.paymentOption}</small>}
                                         </div>
 
                                         <div className="col-md-12 mb-2">
@@ -233,33 +279,26 @@ const Payment = () => {
                                                 className="form-control"
                                                 name="amount"
                                                 value={formData.amount}
-                                                onChange={handleInputChange}
-                                                required
+                                                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                                             />
-                                            {errors.amount && (
-                                                <small className="text-danger">{errors.amount}</small>
-                                            )}
+                                            {errors.amount && <small className="text-danger">{errors.amount}</small>}
                                         </div>
 
                                         <div className="col-md-12">
-                                            <button type="submit" className="btn btnsubmit w-100 mt-2">
+                                            <button type="submit" className="btn btnsubmit w-100 mt-2" disabled={!stripe}>
                                                 Pay Now
                                             </button>
                                         </div>
                                     </div>
                                 </div>
                             </form>
-                           </div>
-                       </div>
-                       <div className="col-md-6 dashboard-right-side left-side fix-height d-flex justify-content-center align-items-center">
-                           <img
-                               src="/img/ozy.png" // Replace with your image URL
-                               alt="Background"
-                               className="img-fluid"
-                           />
-                       </div>
-                       <div className='col-md-12 ms-5 ctm-width'>
-                            <h2 className='ms-1'>Card Details</h2>
+                        </div>
+                    </div>
+                    <div className="col-md-6 dashboard-right-side left-side fix-height d-flex justify-content-center align-items-center">
+                        <img src="/img/ozy.png" alt="Background" className="img-fluid" />
+                    </div>
+                    <div className='col-md-12 ms-5 ctm-width'>
+                            <h2 className='ms-1'>Credit Cards on File Details</h2>
                             <div className='bdrRadius'>
                                 <div className="table-responsive">
                                 <table className='table'>
@@ -282,7 +321,7 @@ const Payment = () => {
                                             <td>{card.lastName}</td>
                                             <td>{card.contact}</td>
                                             <td>{card.Address}</td>
-                                            <td>{`**** **** **** ${card.cardNo.slice(-4)}`}</td>
+                                            <td>{`${card.cardNo.slice(0, 4)} **** **** ****`}</td>
                                             <td>{card.expiryDate}</td>
                                             <td>{card.cvvCode}</td>
                                             <td>
@@ -300,8 +339,8 @@ const Payment = () => {
                                 </div>
                             </div>
                        </div>
-                   </div>
-               </div>
+                </div>
+            </div>    
         </>
     );
 };
