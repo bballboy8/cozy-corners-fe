@@ -4,9 +4,11 @@ import { Navigate } from 'react-router-dom';
 import axios from 'axios'; // Import axios
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+
 const Payment = () => {
        // Define state for error message
        const dispatch = useDispatch();
+       const [token, setToken]= useState();
        const [cards, setCards] = useState([]); // State to store card details
        const [formData, setFormData] = useState({
         nameOnCard: '',
@@ -38,9 +40,21 @@ const Payment = () => {
         };
 
        useEffect(() => {
+        let token = localStorage.getItem('token');
+        setToken(localStorage.getItem('token'));
+        if (!token) {
+            // If there's no token, redirect to the login page
+            // This will depend on how you want to handle unauthorized access
+            console.log("No token found, redirecting to login...");
+            return;
+        }
         const fetchCards = async () => {
             try {
-                const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}creditCards/all`); // Replace with your API URL
+                const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}creditCards/all`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Send token as Authorization header
+                    }
+                });
                 console.log(response.data);
                 setCards(response.data.cards); // Set fetched cards to state
             } catch (error) {
@@ -49,11 +63,15 @@ const Payment = () => {
         };
 
         fetchCards();
-    }, []); // Empty dependency array ensures this runs only once
+    }, [token]); // Empty dependency array ensures this runs only once
 
     const handlePayAgain = async (cardId) => {
         try {
-            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}creditCards/${cardId}`);
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}creditCards/${cardId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Send token as Authorization header
+                }
+            });
             const card = response.data.card; // Adjust based on API response structure
             setFormData({
                 nameOnCard: `${card.firstName} ${card.lastName}`,

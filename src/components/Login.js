@@ -38,9 +38,7 @@ const Login = () => {
             formIsValid = false;
             errorMessages.userPassword = 'Password is required';
         }
-
         setErrors(errorMessages);
-        console.log(userName,'---', userPassword);
         // If the form is valid, we can submit it
         if (formIsValid) {
             const formData = {
