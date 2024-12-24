@@ -38,9 +38,7 @@ const Login = () => {
             formIsValid = false;
             errorMessages.userPassword = 'Password is required';
         }
-
         setErrors(errorMessages);
-        console.log(userName,'---', userPassword);
         // If the form is valid, we can submit it
         if (formIsValid) {
             const formData = {
@@ -49,7 +47,7 @@ const Login = () => {
             };
             try {
                 // Send POST request using axios
-                const response = await axios.post('http://localhost:5000/api/auth/login', formData, {
+                const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}auth/login`, formData, {
                     headers: {
                         'Content-Type': 'application/json', // Set content type to JSON
                     },
@@ -57,7 +55,7 @@ const Login = () => {
                 
                 // Handle successful response
                 dispatch(setToken(response.data.token));
-
+                localStorage.setItem('token', response.data.token);
                 setFormSubmitted(true); // Set formSubmitted to true when the form is successfully submitted 
                 navigate('/dashboard'); // Navigate to dashboard page
             } catch (error) {

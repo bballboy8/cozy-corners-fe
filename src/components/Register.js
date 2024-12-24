@@ -138,7 +138,7 @@ const Register = () => {
             };
             try {
                 // Send POST request using axios
-                const response = await axios.post('http://localhost:5000/api/creditCards/register', formData, {
+                const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}creditCards/register`, formData, {
                     headers: {
                         'Content-Type': 'application/json', // Set content type to JSON
                     },
