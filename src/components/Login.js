@@ -52,14 +52,13 @@ const Login = () => {
                         'Content-Type': 'application/json', // Set content type to JSON
                     },
                 });
-                
-                // Handle successful response
-                dispatch(setToken(response.data.token));
-                localStorage.setItem('token', response.data.token);
-                setFormSubmitted(true); // Set formSubmitted to true when the form is successfully submitted 
-                navigate('/dashboard'); // Navigate to dashboard page
+                if(response.status==200){
+                    dispatch(setToken(response.data.token));
+                    sessionStorage.setItem('token', response.data.token);
+                    setFormSubmitted(true); // Set formSubmitted to true when the form is successfully submitted 
+                    navigate('/dashboard'); // Navigate to dashboard page    
+                }
             } catch (error) {
-                console.log(error.response);
                 if (error.response && error.response.status === 400) {
                     // If the status code is 401 (Unauthorized), display login error message
                     setErrors({

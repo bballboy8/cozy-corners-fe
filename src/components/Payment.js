@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Import axios
 import { loadStripe } from '@stripe/stripe-js';
+import { jwtDecode } from 'jwt-decode';
+
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 const stripePromise = loadStripe(`${process.env.REACT_APP_ACCESS_KEY}`).catch((error) => {
     console.error('Error loading Stripe:', error);
@@ -11,6 +13,7 @@ const stripePromise = loadStripe(`${process.env.REACT_APP_ACCESS_KEY}`).catch((e
 
 const Payment = () => {
        // Define state for error message
+       const navigate = useNavigate();
        const dispatch = useDispatch();
        const [token, setToken]= useState();
        const [cards, setCards] = useState([]); // State to store card details
@@ -46,12 +49,27 @@ const Payment = () => {
         };
 
        useEffect(() => {
-        let token = localStorage.getItem('token');
-        setToken(localStorage.getItem('token'));
+        let token = sessionStorage.getItem('token');
+        setToken(sessionStorage.getItem('token'));
         if (!token) {
-            // If there's no token, redirect to the login page
-            // This will depend on how you want to handle unauthorized access
             console.log("No token found, redirecting to login...");
+            navigate('/login');
+            return;
+        }
+        const isTokenExpired = (token) => {
+            try {
+                const decoded = jwtDecode(token); // Decode the token
+                const currentTime = Math.floor(Date.now() / 1000); // Get current time in seconds
+                return decoded.exp < currentTime; // Check if the token is expired
+            } catch (error) {
+                console.error('Error decoding token:', error);
+                return true; // If there's an error decoding, treat the token as invalid
+            }
+        };
+
+        if (isTokenExpired(token)) {
+            sessionStorage.removeItem('token'); // Remove expired token
+            navigate('/login');
             return;
         }
         const fetchCards = async () => {

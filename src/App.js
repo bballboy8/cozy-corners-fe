@@ -29,7 +29,7 @@ function App() {
     });
 
     // Check if token exists in localStorage and set it in Redux
-    const storedToken = localStorage.getItem('token');
+    const storedToken = sessionStorage.getItem('token');
     if (storedToken) {
       dispatch(setToken(storedToken)); // Store token in Redux
     }
@@ -38,7 +38,7 @@ function App() {
   useEffect(() => {
     // Ensure that token is stored in localStorage whenever it changes in Redux
     if (token) {
-      localStorage.setItem('token', token); // Store token in localStorage
+      sessionStorage.setItem('token', token); // Store token in localStorage
     }
   }, [token]);
 
