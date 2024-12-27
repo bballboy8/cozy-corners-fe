@@ -4,6 +4,10 @@ import { Navigate } from 'react-router-dom';
 import axios from 'axios'; // Import axios
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+const stripePromise = loadStripe(`${process.env.REACT_APP_ACCESS_KEY}`).catch((error) => {
+    console.error('Error loading Stripe:', error);
+    return null; // Return null if Stripe fails to load
+  });
 
 const Payment = () => {
        // Define state for error message
@@ -12,6 +16,7 @@ const Payment = () => {
        const [cards, setCards] = useState([]); // State to store card details
        const [formData, setFormData] = useState({
         nameOnCard: '',
+        email:'',
         cardNumber: '',
         expirationDate: '',
         cvv: '',
@@ -22,6 +27,7 @@ const Payment = () => {
 
        const [errors, setErrors] = useState({
            nameOnCard: '',
+           email:'',
            cardNumber: '',
            expirationDate: '',
            cvv: '',
@@ -55,15 +61,14 @@ const Payment = () => {
                         Authorization: `Bearer ${token}`, // Send token as Authorization header
                     }
                 });
-                console.log(response.data);
                 setCards(response.data.cards); // Set fetched cards to state
             } catch (error) {
                 console.error('Error fetching card details:', error);
             }
         };
-
         fetchCards();
     }, [token]); // Empty dependency array ensures this runs only once
+
 
     const handlePayAgain = async (cardId) => {
         try {
@@ -76,11 +81,16 @@ const Payment = () => {
             setFormData({
                 nameOnCard: `${card.firstName} ${card.lastName}`,
                 cardNumber: card.cardNo,
+                email:card.email,
                 expirationDate: card.expiryDate,
                 cvv: card.cvvCode,
                 amount: '', // Keep amount empty for user to enter
                 paymentOption: 'charge', // Default payment option
             });
+            
+            
+
+            
         } catch (error) {
             console.error('Error fetching card details:', error);
         }
@@ -103,7 +113,11 @@ const Payment = () => {
                formIsValid = false;
                errorMessages.nameOnCard = 'Name on card is required';
            }
-   
+           if (!e.target.email.value) {
+            formIsValid = false;
+            errorMessages.email = 'Email is required';
+            }
+
            const cardNumber = e.target.cardNumber.value;
            if (!cardNumber) {
                formIsValid = false;
@@ -163,31 +177,55 @@ const Payment = () => {
    
            // If the form is valid, we can submit it
            if (formIsValid) {
-            const cardElement = elements.getElement(CardElement);
-            const { token, error } = await stripe.createToken(cardElement);
-            if (error) {
-                console.error(error);
-                setErrors({ general: error.message });
-                return;
-            }
-            try {
-                console.log()
-                const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}creditCards/charge-payment`, {
-                    token: token.id,
-                    amount: formData.amount, // Amount in cents
+            
+            try {   
+                  const response = await axios.post(
+                    `${process.env.REACT_APP_BACKEND_URL}creditCards/charge-payment`,
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${token}`, // Send token as Authorization header 
+                        }
+                    }
+                );
+                const session = response;
+                if(paymentOption=='hold'){
+                    alert('Payment is in hold');
+                    // Reset form data
+                setFormData({
+                    nameOnCard: '',
+                    email: '',
+                    cardNumber: '',
+                    expirationDate: '',
+                    cvv: '',
+                    amount: '',
+                    paymentOption: 'charge', // Reset to default payment option
                 });
 
-                if (response.data.success) {
-                    alert('Payment successful');
-                } else {
-                    setErrors({ general: response.data.message });
+                // Optionally, you can reset errors too if needed
+                setErrors({
+                    nameOnCard: '',
+                    email: '',
+                    cardNumber: '',
+                    expirationDate: '',
+                    cvv: '',
+                    amount: '',
+                    paymentOption: '',
+                });
+                }else{
+                    const stripe = await stripePromise;
+                    const { error } = await stripe.redirectToCheckout({
+                        sessionId: session.data.id,
+                    });
+                    if (error) {
+                        console.error('Error redirecting to Checkout:', error);
+                    }
                 }
             } catch (error) {
                 setErrors({ general: 'Payment failed. Please try again.' });
                 console.error('Error:', error);
             }
-            
-               // Submit form logic here, e.g., call an API
            }
        };
    
@@ -213,7 +251,7 @@ const Payment = () => {
                             <form onSubmit={handleSubmit}>
                                 <div className="container">
                                     <div className="row">
-                                        <div className="col-md-12 mb-2">
+                                        <div className="col-md-12 mb-1">
                                             <label className="mb-2">Name on Card</label>
                                             <input
                                                 type="text"
@@ -225,8 +263,20 @@ const Payment = () => {
                                             />
                                             {errors.nameOnCard && <small className="text-danger">{errors.nameOnCard}</small>}
                                         </div>
+                                        <div className="col-md-12 mb-1">
+                                            <label className="mb-2">Email</label>
+                                            <input
+                                                type="emIL"
+                                                placeholder="Enter email"
+                                                className="form-control"
+                                                name="email"
+                                                value={formData.email}
+                                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            />
+                                            {errors.email && <small className="text-danger">{errors.email}</small>}
+                                        </div>
 
-                                        <div className="col-md-12 mb-2">
+                                        <div className="col-md-12 mb-1">
                                             <label className="mb-2">Credit Card Number</label>
                                             <input
                                                 type="text"
@@ -302,7 +352,6 @@ const Payment = () => {
                                             />
                                             {errors.amount && <small className="text-danger">{errors.amount}</small>}
                                         </div>
-
                                         <div className="col-md-12">
                                             <button type="submit" className="btn btnsubmit w-100 mt-2" disabled={!stripe}>
                                                 Pay Now
@@ -323,8 +372,8 @@ const Payment = () => {
                                 <table className='table'>
                                     <thead>
                                         <tr>
-                                            <th className='bg-head'>First Name</th>
-                                            <th className='bg-head'>Last Name</th>
+                                            <th className='bg-head'>Name</th>
+                                            <th className='bg-head'>Email</th>
                                             <th className='bg-head'>Phone No</th>
                                             <th className='bg-head'>Address</th>
                                             <th className='bg-head'>Card Number</th>
@@ -336,8 +385,8 @@ const Payment = () => {
                                     <tbody>
                                     {cards.map((card, index) => (
                                         <tr key={index}>
-                                            <td>{card.firstName}</td>
-                                            <td>{card.lastName}</td>
+                                            <td>{card.firstName} {card.lastName}</td>
+                                            <td>{card.email}</td>
                                             <td>{card.contact}</td>
                                             <td>{card.Address}</td>
                                             <td>{`${card.cardNo.slice(0, 4)} **** **** ****`}</td>
@@ -365,4 +414,5 @@ const Payment = () => {
 };
 
 export default Payment;
+
 

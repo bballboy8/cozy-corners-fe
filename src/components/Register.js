@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios'; // Import axios
 
 const Register = () => {
@@ -6,12 +6,14 @@ const Register = () => {
     const [expirationDate, setExpirationDate] = useState('');
     const [formSubmitted, setFormSubmitted] = useState(false); // Track if form is submitted
     const [contact, setContact] = useState(''); 
+    const [message,setMessage]=useState('');
     // Define state for error messages
     const [errors, setErrors] = useState({
         firstName: '',
         lastName: '',
         address: '',
         contact:'',
+        email:'',
         nameOnCard: '',
         cardNumber: '',
         expirationDate: '',
@@ -19,7 +21,9 @@ const Register = () => {
         isChecked1: '',
         isChecked2: '',
     });
+    useEffect(()=>{
 
+    },[message]);
     // Handle checkbox change
     const handleCheckboxChange = (e) => {
         const { name, checked } = e.target;
@@ -59,6 +63,10 @@ const Register = () => {
         if (!e.target.address.value) {
             formIsValid = false;
             errorMessages.address = 'Address is required';
+        }
+        if (!e.target.email.value) {
+            formIsValid = false;
+            errorMessages.email = 'Email is required';
         }
 
         if (!e.target.nameOnCard.value) {
@@ -130,6 +138,7 @@ const Register = () => {
                 lastName: e.target.lastName.value,
                 contact:e.target.contact.value,
                 Address: e.target.address.value,
+                email:e.target.email.value,
                 cardHolderName: e.target.nameOnCard.value,
                 cardNo: e.target.cardNumber.value,
                 expiryDate: e.target.expirationDate.value,
@@ -143,9 +152,9 @@ const Register = () => {
                         'Content-Type': 'application/json', // Set content type to JSON
                     },
                 });
-                
                 // Handle successful response
                 console.log(response.data);
+                setMessage(response.data.message);
                 setFormSubmitted(true); // Set formSubmitted to true when the form is successfully submitted 
             } catch (error) {
                 // Handle error response
@@ -190,7 +199,7 @@ const Register = () => {
                         // Show thank-you message after form submission
                         <div className="login-form thank-you-message">
                             <h1>Thank you for your submission in Cozy Corners!</h1>
-                            <p>Your payment details have been successfully submitted.</p>
+                            <p>{message}</p>
                         </div>
                     ) : (
                         // Show form if not submitted
@@ -199,7 +208,7 @@ const Register = () => {
                             <form onSubmit={handleSubmit}>
                                 <div className="container">
                                     <div className="row">
-                                        <div className="col-md-6 mb-2">
+                                        <div className="col-md-6 mb-1">
                                             <label className="mb-1">First Name</label>
                                             <input
                                                 type="text"
@@ -213,7 +222,7 @@ const Register = () => {
                                             )}
                                         </div>
 
-                                        <div className="col-md-6 mb-2">
+                                        <div className="col-md-6 mb-1">
                                             <label className="mb-1">Last Name</label>
                                             <input
                                                 type="text"
@@ -226,7 +235,7 @@ const Register = () => {
                                                 <small className="text-danger">{errors.lastName}</small>
                                             )}
                                         </div>
-                                        <div className="col-md-12 mb-2">
+                                        <div className="col-md-12 mb-1">
                                             <label className="mb-1">Phone Number</label>
                                             <input
                                                 type="text"
@@ -241,7 +250,7 @@ const Register = () => {
                                                 <small className="text-danger">{errors.contact}</small>
                                             )}
                                         </div>
-                                        <div className="col-md-12 mb-2">
+                                        <div className="col-md-12 mb-1">
                                             <label className="mb-1">Address</label>
                                             <input
                                                 type="text"
@@ -254,8 +263,20 @@ const Register = () => {
                                                 <small className="text-danger">{errors.address}</small>
                                             )}
                                         </div>
-
-                                        <div className="col-md-12 mb-2">
+                                        <div className="col-md-12 mb-1">
+                                            <label className="mb-1">Email</label>
+                                            <input
+                                                type="email"
+                                                placeholder="Enter your credit card billing address"
+                                                className="form-control"
+                                                name="email"
+                                                required
+                                            />
+                                            {errors.email && (
+                                                <small className="text-danger">{errors.email}</small>
+                                            )}
+                                        </div>
+                                        <div className="col-md-12 mb-1">
                                             <label className="mb-1">Name on Card</label>
                                             <input
                                                 type="text"
@@ -269,7 +290,7 @@ const Register = () => {
                                             )}
                                         </div>
 
-                                        <div className="col-md-12 mb-2">
+                                        <div className="col-md-12 mb-1">
                                             <label className="mb-1">Credit Card Number</label>
                                             <input
                                                 type="number"
@@ -284,7 +305,7 @@ const Register = () => {
                                             )}
                                         </div>
 
-                                        <div className="col-md-6 mb-2">
+                                        <div className="col-md-6 mb-1">
                                             <label className="mb-1">Expiration Date</label>
                                             <input
                                                 type="text"
