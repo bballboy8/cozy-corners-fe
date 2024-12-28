@@ -284,7 +284,7 @@ const Payment = () => {
                                         <div className="col-md-12 mb-1">
                                             <label className="mb-2">Email</label>
                                             <input
-                                                type="emIL"
+                                                type="email"
                                                 placeholder="Enter email"
                                                 className="form-control"
                                                 name="email"
