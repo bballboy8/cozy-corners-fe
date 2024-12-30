@@ -194,57 +194,104 @@ const Payment = () => {
            setErrors(errorMessages);
    
            // If the form is valid, we can submit it
-           if (formIsValid) {
+        //    if (formIsValid) {
             
-            try {   
-                  const response = await axios.post(
+        //     try {   
+        //           const response = await axios.post(
+        //             `${process.env.REACT_APP_BACKEND_URL}creditCards/charge-payment`,
+        //             formData,
+        //             {
+        //                 headers: {
+        //                     'Content-Type': 'application/json',
+        //                     Authorization: `Bearer ${token}`, // Send token as Authorization header 
+        //                 }
+        //             }
+        //         );
+        //         const session = response;
+        //         if(paymentOption=='hold'){
+        //             alert('Payment is in hold');
+        //             // Reset form data
+        //         setFormData({
+        //             nameOnCard: '',
+        //             email: '',
+        //             cardNumber: '',
+        //             expirationDate: '',
+        //             cvv: '',
+        //             amount: '',
+        //             paymentOption: 'charge', // Reset to default payment option
+        //         });
+        //         // Optionally, you can reset errors too if needed
+        //         setErrors({
+        //             nameOnCard: '',
+        //             email: '',
+        //             cardNumber: '',
+        //             expirationDate: '',
+        //             cvv: '',
+        //             amount: '',
+        //             paymentOption: '',
+        //         });
+        //         }else{
+        //             const stripe = await stripePromise;
+        //             const { error } = await stripe.redirectToCheckout({
+        //                 sessionId: session.data.id,
+        //             });
+        //             if (error) {
+        //                 console.error('Error redirecting to Checkout:', error);
+        //             } else {
+        //                 // Open Stripe Checkout in a new tab
+        //                 window.open(session.data.url, '_blank');
+        //             }
+        //         }
+        //     } catch (error) {
+        //         setErrors({ general: 'Payment failed. Please try again.' });
+        //         console.error('Error:', error);
+        //     }
+        //    }
+
+        if (formIsValid) {
+            try {
+                const response = await axios.post(
                     `${process.env.REACT_APP_BACKEND_URL}creditCards/charge-payment`,
                     formData,
                     {
                         headers: {
                             'Content-Type': 'application/json',
-                            Authorization: `Bearer ${token}`, // Send token as Authorization header 
+                            Authorization: `Bearer ${token}`, // Send token as Authorization header
                         }
                     }
                 );
-                const session = response;
-                if(paymentOption=='hold'){
-                    alert('Payment is in hold');
+                const session = response.data;
+                console.log(session);
+                if (paymentOption === 'hold') {
+                    alert('Payment is on hold');
                     // Reset form data
-                setFormData({
-                    nameOnCard: '',
-                    email: '',
-                    cardNumber: '',
-                    expirationDate: '',
-                    cvv: '',
-                    amount: '',
-                    paymentOption: 'charge', // Reset to default payment option
-                });
-
-                // Optionally, you can reset errors too if needed
-                setErrors({
-                    nameOnCard: '',
-                    email: '',
-                    cardNumber: '',
-                    expirationDate: '',
-                    cvv: '',
-                    amount: '',
-                    paymentOption: '',
-                });
-                }else{
-                    const stripe = await stripePromise;
-                    const { error } = await stripe.redirectToCheckout({
-                        sessionId: session.data.id,
+                    setFormData({
+                        nameOnCard: '',
+                        email: '',
+                        cardNumber: '',
+                        expirationDate: '',
+                        cvv: '',
+                        amount: '',
+                        paymentOption: 'charge', // Reset to default payment option
                     });
-                    if (error) {
-                        console.error('Error redirecting to Checkout:', error);
-                    }
+                    setErrors({
+                        nameOnCard: '',
+                        email: '',
+                        cardNumber: '',
+                        expirationDate: '',
+                        cvv: '',
+                        amount: '',
+                        paymentOption: '',
+                    });
+                } else {
+                    // Open the Stripe Checkout page in a new tab using the session URL
+                    window.open(session.url, '_blank');
                 }
             } catch (error) {
                 setErrors({ general: 'Payment failed. Please try again.' });
                 console.error('Error:', error);
             }
-           }
+        }
        };
    
        const handleExpirationDateChange = (e) => {
@@ -255,16 +302,14 @@ const Payment = () => {
             inputValue = inputValue.replace(/(\d{2})(\d{2})(\d{0,2})/, '$1/$2$3'); // Keep / after two digits
         }
         setExpirationDate(inputValue); // Update the state with the formatted value
-
-
     };
 
        return (
         <>
             <div className="container-fluid dashboard-screen">
                 <div className="row no-gutters mt-4">
-                    <div className="col-md-6 right-side fix-height d-flex justify-content-center align-items-center">
-                        <div className="login-form dashboard mt-5">
+                    <div className="col-md-6 justify-content-center">
+                        <div className="login-form dashboard mt-2">
                             <h2>Enter Card Details</h2>
                             <form onSubmit={handleSubmit}>
                                 <div className="container">
@@ -383,7 +428,8 @@ const Payment = () => {
                     <div className="col-md-6 dashboard-right-side left-side fix-height d-flex justify-content-center align-items-center">
                         <img src="/img/ozy.png" alt="Background" className="img-fluid" />
                     </div>
-                    <div className='col-md-12 ms-5 ctm-width'>
+                    <div className='row'>
+                        <div className='col-md-12 ms-5 ctm-width'>
                             <h2 className='ms-1'>Credit Cards on File Details</h2>
                             <div className='bdrRadius'>
                                 <div className="table-responsive">
@@ -425,6 +471,7 @@ const Payment = () => {
                                 </div>
                             </div>
                        </div>
+                    </div>
                 </div>
             </div>    
         </>
