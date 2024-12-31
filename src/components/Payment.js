@@ -1,15 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // Import axios
 import { loadStripe } from '@stripe/stripe-js';
+import { jwtDecode } from 'jwt-decode';
+
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+const stripePromise = loadStripe(`${process.env.REACT_APP_ACCESS_KEY}`).catch((error) => {
+    console.error('Error loading Stripe:', error);
+    return null; // Return null if Stripe fails to load
+  });
+
 const Payment = () => {
        // Define state for error message
+       const navigate = useNavigate();
        const dispatch = useDispatch();
+       const [token, setToken]= useState();
        const [cards, setCards] = useState([]); // State to store card details
        const [formData, setFormData] = useState({
         nameOnCard: '',
+        email:'',
         cardNumber: '',
         expirationDate: '',
         cvv: '',
@@ -20,6 +30,7 @@ const Payment = () => {
 
        const [errors, setErrors] = useState({
            nameOnCard: '',
+           email:'',
            cardNumber: '',
            expirationDate: '',
            cvv: '',
@@ -28,6 +39,7 @@ const Payment = () => {
        });
        
        const [expirationDate, setExpirationDate] = useState('');  
+
        const stripe = useStripe();
        const elements = useElements();
 
@@ -37,31 +49,66 @@ const Payment = () => {
         };
 
        useEffect(() => {
+        let token = sessionStorage.getItem('token');
+        setToken(sessionStorage.getItem('token'));
+        if (!token) {
+            console.log("No token found, redirecting to login...");
+            navigate('/login');
+            return;
+        }
+        const isTokenExpired = (token) => {
+            try {
+                const decoded = jwtDecode(token); // Decode the token
+                const currentTime = Math.floor(Date.now() / 1000); // Get current time in seconds
+                return decoded.exp < currentTime; // Check if the token is expired
+            } catch (error) {
+                console.error('Error decoding token:', error);
+                return true; // If there's an error decoding, treat the token as invalid
+            }
+        };
+
+        if (isTokenExpired(token)) {
+            sessionStorage.removeItem('token'); // Remove expired token
+            navigate('/login');
+            return;
+        }
         const fetchCards = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/creditCards/all'); // Replace with your API URL
-                console.log(response.data);
+                const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}creditCards/all`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`, // Send token as Authorization header
+                    }
+                });
                 setCards(response.data.cards); // Set fetched cards to state
             } catch (error) {
                 console.error('Error fetching card details:', error);
             }
         };
-
         fetchCards();
-    }, []); // Empty dependency array ensures this runs only once
+    }, [token]); // Empty dependency array ensures this runs only once
+
 
     const handlePayAgain = async (cardId) => {
         try {
-            const response = await axios.get(`http://localhost:5000/api/creditCards/${cardId}`);
+            const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}creditCards/${cardId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // Send token as Authorization header
+                }
+            });
             const card = response.data.card; // Adjust based on API response structure
             setFormData({
                 nameOnCard: `${card.firstName} ${card.lastName}`,
                 cardNumber: card.cardNo,
+                email:card.email,
                 expirationDate: card.expiryDate,
                 cvv: card.cvvCode,
                 amount: '', // Keep amount empty for user to enter
                 paymentOption: 'charge', // Default payment option
             });
+            
+            
+
+            
         } catch (error) {
             console.error('Error fetching card details:', error);
         }
@@ -84,7 +131,11 @@ const Payment = () => {
                formIsValid = false;
                errorMessages.nameOnCard = 'Name on card is required';
            }
-   
+           if (!e.target.email.value) {
+            formIsValid = false;
+            errorMessages.email = 'Email is required';
+            }
+
            const cardNumber = e.target.cardNumber.value;
            if (!cardNumber) {
                formIsValid = false;
@@ -143,33 +194,104 @@ const Payment = () => {
            setErrors(errorMessages);
    
            // If the form is valid, we can submit it
-           if (formIsValid) {
-            const cardElement = elements.getElement(CardElement);
-            const { token, error } = await stripe.createToken(cardElement);
-            if (error) {
-                console.error(error);
-                setErrors({ general: error.message });
-                return;
-            }
-            try {
-                console.log()
-                const response = await axios.post('http://localhost:5000/api/creditCards/charge-payment', {
-                    token: token.id,
-                    amount: formData.amount, // Amount in cents
-                });
+        //    if (formIsValid) {
+            
+        //     try {   
+        //           const response = await axios.post(
+        //             `${process.env.REACT_APP_BACKEND_URL}creditCards/charge-payment`,
+        //             formData,
+        //             {
+        //                 headers: {
+        //                     'Content-Type': 'application/json',
+        //                     Authorization: `Bearer ${token}`, // Send token as Authorization header 
+        //                 }
+        //             }
+        //         );
+        //         const session = response;
+        //         if(paymentOption=='hold'){
+        //             alert('Payment is in hold');
+        //             // Reset form data
+        //         setFormData({
+        //             nameOnCard: '',
+        //             email: '',
+        //             cardNumber: '',
+        //             expirationDate: '',
+        //             cvv: '',
+        //             amount: '',
+        //             paymentOption: 'charge', // Reset to default payment option
+        //         });
+        //         // Optionally, you can reset errors too if needed
+        //         setErrors({
+        //             nameOnCard: '',
+        //             email: '',
+        //             cardNumber: '',
+        //             expirationDate: '',
+        //             cvv: '',
+        //             amount: '',
+        //             paymentOption: '',
+        //         });
+        //         }else{
+        //             const stripe = await stripePromise;
+        //             const { error } = await stripe.redirectToCheckout({
+        //                 sessionId: session.data.id,
+        //             });
+        //             if (error) {
+        //                 console.error('Error redirecting to Checkout:', error);
+        //             } else {
+        //                 // Open Stripe Checkout in a new tab
+        //                 window.open(session.data.url, '_blank');
+        //             }
+        //         }
+        //     } catch (error) {
+        //         setErrors({ general: 'Payment failed. Please try again.' });
+        //         console.error('Error:', error);
+        //     }
+        //    }
 
-                if (response.data.success) {
-                    alert('Payment successful');
+        if (formIsValid) {
+            try {
+                const response = await axios.post(
+                    `${process.env.REACT_APP_BACKEND_URL}creditCards/charge-payment`,
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${token}`, // Send token as Authorization header
+                        }
+                    }
+                );
+                const session = response.data;
+                console.log(session);
+                if (paymentOption === 'hold') {
+                    alert('Payment is on hold');
+                    // Reset form data
+                    setFormData({
+                        nameOnCard: '',
+                        email: '',
+                        cardNumber: '',
+                        expirationDate: '',
+                        cvv: '',
+                        amount: '',
+                        paymentOption: 'charge', // Reset to default payment option
+                    });
+                    setErrors({
+                        nameOnCard: '',
+                        email: '',
+                        cardNumber: '',
+                        expirationDate: '',
+                        cvv: '',
+                        amount: '',
+                        paymentOption: '',
+                    });
                 } else {
-                    setErrors({ general: response.data.message });
+                    // Open the Stripe Checkout page in a new tab using the session URL
+                    window.open(session.url, '_blank');
                 }
             } catch (error) {
                 setErrors({ general: 'Payment failed. Please try again.' });
                 console.error('Error:', error);
             }
-            
-               // Submit form logic here, e.g., call an API
-           }
+        }
        };
    
        const handleExpirationDateChange = (e) => {
@@ -180,21 +302,19 @@ const Payment = () => {
             inputValue = inputValue.replace(/(\d{2})(\d{2})(\d{0,2})/, '$1/$2$3'); // Keep / after two digits
         }
         setExpirationDate(inputValue); // Update the state with the formatted value
-
-
     };
 
        return (
         <>
             <div className="container-fluid dashboard-screen">
                 <div className="row no-gutters mt-4">
-                    <div className="col-md-6 right-side fix-height d-flex justify-content-center align-items-center">
-                        <div className="login-form dashboard mt-5">
+                    <div className="col-md-6 justify-content-center">
+                        <div className="login-form dashboard mt-2">
                             <h2>Enter Card Details</h2>
                             <form onSubmit={handleSubmit}>
                                 <div className="container">
                                     <div className="row">
-                                        <div className="col-md-12 mb-2">
+                                        <div className="col-md-12 mb-1">
                                             <label className="mb-2">Name on Card</label>
                                             <input
                                                 type="text"
@@ -206,8 +326,20 @@ const Payment = () => {
                                             />
                                             {errors.nameOnCard && <small className="text-danger">{errors.nameOnCard}</small>}
                                         </div>
+                                        <div className="col-md-12 mb-1">
+                                            <label className="mb-2">Email</label>
+                                            <input
+                                                type="email"
+                                                placeholder="Enter email"
+                                                className="form-control"
+                                                name="email"
+                                                value={formData.email}
+                                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            />
+                                            {errors.email && <small className="text-danger">{errors.email}</small>}
+                                        </div>
 
-                                        <div className="col-md-12 mb-2">
+                                        <div className="col-md-12 mb-1">
                                             <label className="mb-2">Credit Card Number</label>
                                             <input
                                                 type="text"
@@ -283,7 +415,6 @@ const Payment = () => {
                                             />
                                             {errors.amount && <small className="text-danger">{errors.amount}</small>}
                                         </div>
-
                                         <div className="col-md-12">
                                             <button type="submit" className="btn btnsubmit w-100 mt-2" disabled={!stripe}>
                                                 Pay Now
@@ -297,15 +428,16 @@ const Payment = () => {
                     <div className="col-md-6 dashboard-right-side left-side fix-height d-flex justify-content-center align-items-center">
                         <img src="/img/ozy.png" alt="Background" className="img-fluid" />
                     </div>
-                    <div className='col-md-12 ms-5 ctm-width'>
+                    <div className='row'>
+                        <div className='col-md-12 ms-5 ctm-width'>
                             <h2 className='ms-1'>Credit Cards on File Details</h2>
                             <div className='bdrRadius'>
                                 <div className="table-responsive">
                                 <table className='table'>
                                     <thead>
                                         <tr>
-                                            <th className='bg-head'>First Name</th>
-                                            <th className='bg-head'>Last Name</th>
+                                            <th className='bg-head'>Name</th>
+                                            <th className='bg-head'>Email</th>
                                             <th className='bg-head'>Phone No</th>
                                             <th className='bg-head'>Address</th>
                                             <th className='bg-head'>Card Number</th>
@@ -317,8 +449,8 @@ const Payment = () => {
                                     <tbody>
                                     {cards.map((card, index) => (
                                         <tr key={index}>
-                                            <td>{card.firstName}</td>
-                                            <td>{card.lastName}</td>
+                                            <td>{card.firstName} {card.lastName}</td>
+                                            <td>{card.email}</td>
                                             <td>{card.contact}</td>
                                             <td>{card.Address}</td>
                                             <td>{`${card.cardNo.slice(0, 4)} **** **** ****`}</td>
@@ -339,6 +471,7 @@ const Payment = () => {
                                 </div>
                             </div>
                        </div>
+                    </div>
                 </div>
             </div>    
         </>
@@ -346,4 +479,5 @@ const Payment = () => {
 };
 
 export default Payment;
+
 
