@@ -16,7 +16,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '18'
+          node-version: '20'
+
+      - name: Create .env file
+        run: |
+          echo "REACT_APP_BACKEND_URL=${{ secrets.REACT_APP_BACKEND_URL }}" >> .env
+          echo "REACT_APP_ACCESS_KEY=${{ secrets.REACT_APP_ACCESS_KEY }}" >> .env
 
       - name: Install dependencies
         run: npm install
