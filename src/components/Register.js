@@ -112,9 +112,9 @@ const Register = () => {
         if (!cvv) {
             formIsValid = false;
             errorMessages.cvv = 'CVV is required';
-        } else if (cvv.length !== 3) {
+        } else if (cvv.length > 2 && cvv.length < 5) {
             formIsValid = false;
-            errorMessages.cvv = 'CVV must be 3 digits';
+            errorMessages.cvv = 'CVVcode must be accurate';
         }
 
         if (!e.target.isChecked1.checked) {
@@ -198,8 +198,8 @@ const Register = () => {
                     {formSubmitted ? (
                         // Show thank-you message after form submission
                         <div className="login-form thank-you-message">
-                            <h1>Thank you for your submission in Cozy Corners!</h1>
-                            <p>{message}</p>
+                            <h1>{message}</h1>
+                            
                         </div>
                     ) : (
                         // Show form if not submitted

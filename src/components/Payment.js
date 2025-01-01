@@ -97,7 +97,7 @@ const Payment = () => {
             });
             const card = response.data.card; // Adjust based on API response structure
             setFormData({
-                nameOnCard: `${card.firstName} ${card.lastName}`,
+                nameOnCard: `${card.cardHolderName}`,
                 cardNumber: card.cardNo,
                 email:card.email,
                 expirationDate: card.expiryDate,
@@ -175,9 +175,9 @@ const Payment = () => {
         if (!cvv) {
             formIsValid = false;
             errorMessages.cvv = 'CVV is required';
-        } else if (cvv.length !== 3) {
+        } else if (cvv.length > 2 && cvv.length < 5) {
             formIsValid = false;
-            errorMessages.cvv = 'CVV must be 3 digits';
+            errorMessages.cvv = 'CVVcode must be accurate';
         }
    
             if (!e.target.amount.value) {
