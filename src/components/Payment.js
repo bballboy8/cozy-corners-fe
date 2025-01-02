@@ -104,11 +104,7 @@ const Payment = () => {
                 cvv: card.cvvCode,
                 amount: '', // Keep amount empty for user to enter
                 paymentOption: 'charge', // Default payment option
-            });
-            
-            
-
-            
+            });   
         } catch (error) {
             console.error('Error fetching card details:', error);
         }
@@ -175,7 +171,7 @@ const Payment = () => {
         if (!cvv) {
             formIsValid = false;
             errorMessages.cvv = 'CVV is required';
-        } else if (cvv.length > 2 && cvv.length < 5) {
+        } else if (cvv.length < 3 || cvv.length > 4) {
             formIsValid = false;
             errorMessages.cvv = 'CVVcode must be accurate';
         }
@@ -261,7 +257,7 @@ const Payment = () => {
                     }
                 );
                 const session = response.data;
-                console.log(session);
+                
                 if (paymentOption === 'hold') {
                     alert('Payment is on hold');
                     // Reset form data

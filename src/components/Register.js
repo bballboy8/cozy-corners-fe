@@ -112,7 +112,7 @@ const Register = () => {
         if (!cvv) {
             formIsValid = false;
             errorMessages.cvv = 'CVV is required';
-        } else if (cvv.length > 2 && cvv.length < 5) {
+        } else if (cvv.length < 3 || cvv.length > 4) {
             formIsValid = false;
             errorMessages.cvv = 'CVVcode must be accurate';
         }
@@ -158,7 +158,8 @@ const Register = () => {
                 setFormSubmitted(true); // Set formSubmitted to true when the form is successfully submitted 
             } catch (error) {
                 // Handle error response
-                console.error('Error submitting form:', error);
+                console.error('Error submitting form:', error.AxiosError );
+                setMessage(error.message);
                 // Optionally set an error state to display an error message to the user
             }
         }
