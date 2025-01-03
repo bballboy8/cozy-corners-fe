@@ -195,7 +195,7 @@ const Register = () => {
                     />
                 </div>
 
-                <div className="col-md-7 login-right-side right-side d-flex justify-content-center align-items-center">
+                <div className="col-md-7 login-right-side right-side d-flex main-section align-items-center">
                     {formSubmitted ? (
                         // Show thank-you message after form submission
                         <div className="login-form thank-you-message">

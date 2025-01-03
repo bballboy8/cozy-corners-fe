@@ -184,3 +184,11 @@ small.text-danger {
       margin:50px 10px 0px 10px !important;
   }
 }
+
+.login-right-side.right-side.d-flex.main-section{
+  min-height: 100vh !important;
+  height: unset !important;
+}
+.main-section .login-form.login-form-section{
+  margin: auto;
+}
