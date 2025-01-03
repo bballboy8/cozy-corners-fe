@@ -25,7 +25,7 @@ function App() {
   useEffect(() => {
     // Load the CSS file dynamically
 
-    LoadStyleSheet('/static/css/main.bd133e9d.css', () => {
+    LoadStyleSheet('/static/css/main.6ea1075c.css', () => {
       setLoading(false); // Set loading to false once the CSS is loaded
     });
 

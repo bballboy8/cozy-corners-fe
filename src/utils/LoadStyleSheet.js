@@ -10,7 +10,6 @@ export const LoadStyleSheet = (path, onLoadCallback) => {
         onLoadCallback(); // Run the callback function once the CSS is loaded
       }
     };
-    
     document.head.appendChild(link);
   };
   
